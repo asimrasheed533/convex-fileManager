@@ -69,8 +69,6 @@ export default function FileManager() {
   const filteredFiles = files.filter((file) =>
     file.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // Filter folders based on search query
   const filteredFolders = folders.filter((folder) =>
     folder.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -148,11 +146,7 @@ export default function FileManager() {
                 try {
                   const userId = localStorage.getItem("userId");
                   if (!userId) throw new Error("User not authenticated");
-
-                  // Get upload URL
                   const uploadUrl = await generateUploadUrl();
-
-                  // Upload file to storage
                   const result = await fetch(uploadUrl, {
                     method: "POST",
                     headers: {
@@ -161,8 +155,6 @@ export default function FileManager() {
                     body: file,
                   });
                   const { storageId } = await result.json();
-
-                  // Create file record
                   await createFile({
                     name: file.name,
                     owner: userId as Id<"users">,
@@ -184,7 +176,6 @@ export default function FileManager() {
                 </Button>
               }
             />
-            {/* Delete button removed as it's handled in FileActions */}
             <Button variant="outline" size="icon" title="Edit">
               <Edit className="h-4 w-4" />
             </Button>
