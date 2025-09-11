@@ -51,3 +51,24 @@ export const getFiles = query({
       .collect();
   },
 });
+
+export const deleteFile = mutation({
+  args: {
+    id: v.id("files"),
+  },
+  handler: async (ctx, args) => {
+    const file = await ctx.db.get(args.id);
+    if (!file) {
+      throw new Error("File not found");
+    }
+    
+    // Delete the file from storage if it has a storageId
+    if (file.storageId) {
+      await ctx.storage.delete(file.storageId);
+    }
+    
+    // Delete the file record from the database
+    await ctx.db.delete(args.id);
+    return { success: true };
+  },
+});
