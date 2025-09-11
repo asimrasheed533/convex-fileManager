@@ -20,12 +20,7 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
-  signup: (
-    name: string,
-    email: string,
-    password: string,
-    tenantName: string
-  ) => Promise<void>;
+  signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -59,13 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("whiteboard-user", JSON.stringify(loggedInUser));
   };
 
-  const signup = async (
-    name: string,
-    email: string,
-    password: string,
-    tenantName: string
-  ) => {
-    await signupMutation({ name, email, password, tenantName });
+  const signup = async (name: string, email: string, password: string) => {
+    await signupMutation({ name, email, password });
     await login(email, password);
   };
 

@@ -6,10 +6,28 @@ export default defineSchema({
     name: v.string(),
     email: v.string(),
     passwordHash: v.string(),
-    tenantName: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_email", ["email"]),
+  folders: defineTable({
+    name: v.string(),
+    owner: v.id("users"),
+    parent: v.union(v.id("folders"), v.null()),
+    path: v.array(v.string()),
+  }).index("by_owner", ["owner", "parent"]),
+  files: defineTable({
+    name: v.string(),
+    owner: v.id("users"),
+    folder: v.union(v.id("folders"), v.null()),
+    storageId: v.id("_storage"),
+    size: v.number(),
+    mimeType: v.string(),
+    isPublic: v.boolean(),
+    type: v.string(),
+  })
+    .index("by_folder", ["folder"])
+    .index("by_owner", ["owner"])
+    .index("by_name_owner", ["name", "owner"]),
   todo: defineTable({
     task: v.string(),
     completed: v.boolean(),

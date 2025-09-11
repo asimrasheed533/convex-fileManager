@@ -22,28 +22,10 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
-  const [tenantName, setTenantName] = useState<string>("");
   const { login } = useAuth();
   const router = useRouter();
 
   const signupMutation = useMutation(api.user.signup);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      if (isSignUp) {
-        console.log("Signup request:", { tenantName, email, password });
-        await signupMutation({ name: tenantName, email, password, tenantName });
-      } else {
-        console.log("Login request:", { email, password });
-        await login(email, password);
-      }
-      router.push("/");
-    } catch (error) {
-      console.error(" Auth error:", error);
-    }
-  };
 
   return (
     <Card className="w-full shadow-lg border-0 bg-muted backdrop-blur-sm">
@@ -58,7 +40,7 @@ export function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -92,8 +74,8 @@ export function LoginForm() {
                 id="tenant"
                 type="text"
                 placeholder="Your Company"
-                value={tenantName}
-                onChange={(e) => setTenantName(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="h-11 border-amber-50"
               />

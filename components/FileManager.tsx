@@ -1,0 +1,229 @@
+"use client";
+
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Folder,
+  File,
+  Upload,
+  Trash2,
+  Edit,
+  MoreVertical,
+  Grid,
+  List,
+  Plus,
+  FolderOpen,
+  ChevronRight,
+  Search,
+} from "lucide-react";
+import DownloadIcon from "@/icons/DownloadIcon";
+
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+type ViewMode = "grid" | "list";
+
+export default function FileManager() {
+  const [selectedFolder, setSelectedFolder] = useState<Id<"folders"> | null>(
+    null
+  );
+
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const files = useQuery(api.files.getFiles, { folder: selectedFolder }) ?? [];
+
+  const filteredFiles = files.filter((file) =>
+    file.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="border-b p-4 flex items-center justify-between">
+          <div className="relative w-64">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search files..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button variant="outline" size="sm">
+              <Upload className="h-4 w-4 mr-2" />
+              Upload
+            </Button>
+            <Button variant="outline" size="icon" title="Delete">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" title="Edit">
+              <Edit className="h-4 w-4" />
+            </Button>
+            <div className="border-l h-6 mx-2" />
+            <Button
+              variant={viewMode === "grid" ? "default" : "outline"}
+              size="icon"
+              onClick={() => setViewMode("grid")}
+              title="Grid View"
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "default" : "outline"}
+              size="icon"
+              onClick={() => setViewMode("list")}
+              title="List View"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        <div className="flex-1 p-4 overflow-y-auto">
+          {viewMode === "grid" ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {filteredFiles.map((file) => (
+                <Card
+                  key={file._id}
+                  className="overflow-hidden hover:shadow-md transition-shadow"
+                >
+                  <div className="bg-muted/30 p-4 flex items-center justify-center h-32">
+                    <FileIcon type={file.type} />
+                  </div>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="truncate">
+                        <h3 className="font-medium truncate" title={file.name}>
+                          {file.name}
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {file.size} • {file._creationTime}
+                        </p>
+                      </div>
+                      <FileActions />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filteredFiles.map((file) => (
+                <div
+                  key={file._id}
+                  className="flex items-center p-3 rounded-md hover:bg-accent/50 transition-colors"
+                >
+                  <div className="mr-3">
+                    <FileIcon type={file.type} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium truncate">{file.name}</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {file.size} • {file._creationTime}
+                    </p>
+                  </div>
+                  <div className="ml-4 text-sm text-muted-foreground">
+                    {file.type}
+                  </div>
+                  <FileActions />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FileActions() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+          <MoreVertical className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem>
+          <Edit className="h-4 w-4 mr-2" /> Rename
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <DownloadIcon className="h-4 w-4 mr-2" /> Download
+        </DropdownMenuItem>
+        <DropdownMenuItem className="text-destructive">
+          <Trash2 className="h-4 w-4 mr-2" /> Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function FileIcon({ type }: { type: string }) {
+  switch (type) {
+    case "document":
+      return <File className="h-10 w-10 text-blue-500" />;
+    case "spreadsheet":
+      return <File className="h-10 w-10 text-green-500" />;
+    case "presentation":
+      return <File className="h-10 w-10 text-orange-500" />;
+    case "pdf":
+      return <File className="h-10 w-10 text-red-500" />;
+    case "image":
+      return <Image className="h-10 w-10 text-purple-500" />;
+    case "video":
+      return <Video className="h-10 w-10 text-pink-500" />;
+    default:
+      return <File className="h-10 w-10" />;
+  }
+}
+
+function Image(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+      <circle cx="9" cy="9" r="2" />
+      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+    </svg>
+  );
+}
+
+function Video(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="m22 8-6 4 6 4V8Z" />
+      <rect width="14" height="12" x="2" y="6" rx="2" ry="2" />
+    </svg>
+  );
+}

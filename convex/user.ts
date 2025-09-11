@@ -7,10 +7,9 @@ export const signup = mutation({
     name: v.string(),
     email: v.string(),
     password: v.string(),
-    tenantName: v.string(),
   },
 
-  handler: async (ctx, { name, email, password, tenantName }) => {
+  handler: async (ctx, { name, email, password }) => {
     const existing = await ctx.db
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", email))
@@ -26,7 +25,6 @@ export const signup = mutation({
       name,
       email,
       passwordHash,
-      tenantName,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
