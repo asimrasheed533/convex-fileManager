@@ -42,46 +42,24 @@ export default function FileManager() {
 
   const createFolder = useMutation(api.folders.createFolder);
   const [isUploading, setIsUploading] = useState(false);
-  // const createFile = useMutation(api.files.createFile);
+  const createFile = useMutation(api.files.createFile);
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const sendFile = useMutation(api.files.createFile);
-  const userId =
-    typeof window !== "undefined"
-      ? (localStorage.getItem("userId") as Id<"users">)
-      : null;
+  const userId = "123";
 
-  const folders =
-    useQuery(
-      api.folders.listFolders,
-      userId
-        ? {
-            owner: userId,
-            parent: selectedFolder,
-          }
-        : "skip"
-    ) ?? [];
+  const files = useQuery(api.files.getFiles, { folder: null }) ?? [];
 
-  const files = useQuery(api.files.getFiles, { folder: selectedFolder }) ?? [];
+  // const files = useQuery(api.files.getFiles, { folder: selectedFolder }) ?? [];
 
   const filteredFiles = files.filter((file) =>
     file.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  const filteredFolders = folders.filter((folder) =>
-    folder.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  const navigateToFolder = (folderId: Id<"folders">) => {
-    setSelectedFolder(folderId);
-  };
-  const navigateUp = () => {
-    if (!selectedFolder) return;
-    const currentFolder = folders.find((f) => f._id === selectedFolder);
-
-    if (currentFolder && currentFolder.parent) {
-      setSelectedFolder(currentFolder.parent);
-    } else {
-      setSelectedFolder(null);
-    }
-  };
+  // const filteredFolders = folders.filter((folder) =>
+  //   folder.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
+  // const navigateToFolder = (folderId: Id<"folders">) => {
+  //   setSelectedFolder(folderId);
+  // };
 
   async function handleSendFile(file: File) {
     if (!file || !userId) return;
@@ -103,15 +81,15 @@ export default function FileManager() {
 
       const myFile = await sendFile({
         name: file.name,
-        owner: userId,
-        folder: selectedFolder,
+        owner: "123",
+        folder: null,
         storageId,
         size: file.size,
         mimeType: file.type,
         isPublic: false,
         type: "document",
       });
-      console.log("myFile", myFile);
+      console.log("File uploaded:", myFile);
     } catch (err) {
       console.error("File upload error:", err);
     } finally {
@@ -128,7 +106,7 @@ export default function FileManager() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={navigateUp}
+                // onClick={navigateUp}
                 title="Go up one level"
               >
                 <ChevronRight className="h-4 w-4 rotate-180" />
@@ -146,20 +124,7 @@ export default function FileManager() {
           </div>
           <div className="flex items-center space-x-2">
             <CreateFolderDialog
-              onCreateFolder={async (name) => {
-                try {
-                  const userId = localStorage.getItem("userId");
-                  if (!userId) throw new Error("User not authenticated");
-
-                  await createFolder({
-                    name,
-                    owner: userId as Id<"users">,
-                    parent: selectedFolder,
-                  });
-                } catch (error) {
-                  console.error("Error creating folder:", error);
-                }
-              }}
+              onCreateFolder={() => {}}
               trigger={
                 <Button variant="outline" size="sm">
                   <Plus className="h-4 w-4 mr-2" />
@@ -169,6 +134,7 @@ export default function FileManager() {
             />
             <CreateFileDialog
               onUploadFile={handleSendFile}
+              isUploading={isUploading}
               trigger={
                 <Button variant="outline" size="sm">
                   <Upload className="h-4 w-4 mr-2" />
@@ -200,22 +166,22 @@ export default function FileManager() {
         </div>
         <div className="flex-1 p-4 overflow-y-auto">
           {/* Display current path */}
-          <div className="mb-4 text-sm text-muted-foreground">
+          {/* <div className="mb-4 text-sm text-muted-foreground">
             {selectedFolder
               ? "Folder: " +
                 (folders.find((f) => f._id === selectedFolder)?.name ||
                   "Loading...")
               : "Root"}
-          </div>
+          </div> */}
 
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {/* Render folders */}
-              {filteredFolders.map((folder) => (
+              {filteredFiles.map((folder) => (
                 <Card
                   key={folder._id}
                   className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => navigateToFolder(folder._id)}
+                  // onClick={() => navigateToFolder(folder._id)}
                 >
                   <div className="bg-muted/30 p-4 flex items-center justify-center h-32">
                     <FolderOpen className="h-16 w-16 text-yellow-500" />
@@ -267,11 +233,11 @@ export default function FileManager() {
           ) : (
             <div className="space-y-2">
               {/* Render folders in list view */}
-              {filteredFolders.map((folder) => (
+              {filteredFiles.map((folder) => (
                 <div
                   key={folder._id}
                   className="flex items-center p-3 rounded-md hover:bg-accent/50 transition-colors cursor-pointer"
-                  onClick={() => navigateToFolder(folder._id)}
+                  // onClick={() => navigateToFolder(folder._id)}
                 >
                   <div className="mr-3">
                     <FolderOpen className="h-10 w-10 text-yellow-500" />

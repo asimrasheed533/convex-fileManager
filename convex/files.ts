@@ -4,7 +4,8 @@ import { v } from "convex/values";
 export const createFile = mutation({
   args: {
     name: v.string(),
-    owner: v.id("users"),
+    // owner: v.id("users"),
+    owner: v.string(),
     folder: v.union(v.id("folders"), v.null()),
     storageId: v.id("_storage"),
     size: v.number(),

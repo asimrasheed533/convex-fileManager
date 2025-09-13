@@ -18,15 +18,16 @@ import { Upload, File } from "lucide-react";
 interface CreateFileDialogProps {
   onUploadFile: (file: File) => Promise<void>;
   trigger?: React.ReactNode;
+  isUploading?: boolean;
 }
 
 export function CreateFileDialog({
   onUploadFile,
   trigger,
+  isUploading = false,
 }: CreateFileDialogProps) {
   const [open, setOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +40,6 @@ export function CreateFileDialog({
     e.preventDefault();
     if (!selectedFile) return;
 
-    setIsUploading(true);
     try {
       await onUploadFile(selectedFile);
       setSelectedFile(null);
@@ -49,8 +49,6 @@ export function CreateFileDialog({
       }
     } catch (error) {
       console.error("Error uploading file:", error);
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -71,38 +69,42 @@ export function CreateFileDialog({
             Select a file from your device to upload.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="file" className="text-right">
-                File
-              </Label>
-              <div className="col-span-3">
-                <Input
-                  id="file"
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  className="col-span-3"
-                />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-2xl p-6 text-center hover:bg-muted/30 transition cursor-pointer">
+            <input
+              id="file"
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <label
+              htmlFor="file"
+              className="flex flex-col items-center gap-2 cursor-pointer"
+            >
+              <Upload className="h-10 w-10 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground">
+                Click to upload or drag & drop
+              </span>
+              <span className="text-xs text-muted-foreground">
+                PNG, JPG, PDF up to 10MB
+              </span>
+            </label>
+          </div>
+
+          {selectedFile && (
+            <div className="flex items-center gap-3 rounded-lg border p-3 bg-muted/20">
+              <File className="h-5 w-5 text-muted-foreground" />
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">{selectedFile.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {Math.round(selectedFile.size / 1024)} KB
+                </span>
               </div>
             </div>
-            {selectedFile && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <div className="text-right text-sm text-muted-foreground">
-                  Selected
-                </div>
-                <div className="col-span-3 flex items-center gap-2">
-                  <File className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm truncate">{selectedFile.name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    ({Math.round(selectedFile.size / 1024)} KB)
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
+          )}
+
+          <DialogFooter className="flex justify-end gap-2">
             <Button
               type="button"
               variant="outline"

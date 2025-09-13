@@ -11,13 +11,13 @@ export default defineSchema({
   }).index("by_email", ["email"]),
   folders: defineTable({
     name: v.string(),
-    owner: v.id("users"),
+    owner: v.string(),
     parent: v.union(v.id("folders"), v.null()),
     path: v.array(v.string()),
   }).index("by_owner", ["owner", "parent"]),
   files: defineTable({
     name: v.string(),
-    owner: v.id("users"),
+    owner: v.string(),
     folder: v.union(v.id("folders"), v.null()),
     storageId: v.id("_storage"),
     size: v.number(),
