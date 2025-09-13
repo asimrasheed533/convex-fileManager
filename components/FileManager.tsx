@@ -40,26 +40,15 @@ export default function FileManager() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const createFolder = useMutation(api.folders.createFolder);
   const [isUploading, setIsUploading] = useState(false);
-  const createFile = useMutation(api.files.createFile);
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const sendFile = useMutation(api.files.createFile);
   const userId = "123";
-
-  const files = useQuery(api.files.getFiles, { folder: null }) ?? [];
-
-  // const files = useQuery(api.files.getFiles, { folder: selectedFolder }) ?? [];
+  const files = useQuery(api.files.getFiles, { folder: selectedFolder }) ?? [];
 
   const filteredFiles = files.filter((file) =>
     file.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  // const filteredFolders = folders.filter((folder) =>
-  //   folder.name.toLowerCase().includes(searchQuery.toLowerCase())
-  // );
-  // const navigateToFolder = (folderId: Id<"folders">) => {
-  //   setSelectedFolder(folderId);
-  // };
 
   async function handleSendFile(file: File) {
     if (!file || !userId) return;
@@ -82,7 +71,7 @@ export default function FileManager() {
       const myFile = await sendFile({
         name: file.name,
         owner: "123",
-        folder: null,
+        folder: selectedFolder ?? null,
         storageId,
         size: file.size,
         mimeType: file.type,
@@ -90,6 +79,8 @@ export default function FileManager() {
         type: "document",
       });
       console.log("File uploaded:", myFile);
+      console.log("selectedFolder:", selectedFolder);
+      console.log("sending folder arg:", selectedFolder ?? null);
     } catch (err) {
       console.error("File upload error:", err);
     } finally {
