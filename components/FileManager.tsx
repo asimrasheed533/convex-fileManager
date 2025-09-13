@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Folder,
   File,
   Upload,
   Trash2,
@@ -41,18 +40,16 @@ export default function FileManager() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Mutations for creating folders and files
   const createFolder = useMutation(api.folders.createFolder);
-  const createFile = useMutation(api.files.createFile);
+  const [isUploading, setIsUploading] = useState(false);
+  // const createFile = useMutation(api.files.createFile);
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
-
-  // Get user ID from localStorage
+  const sendFile = useMutation(api.files.createFile);
   const userId =
     typeof window !== "undefined"
       ? (localStorage.getItem("userId") as Id<"users">)
       : null;
 
-  // Query folders and files from Convex
   const folders =
     useQuery(
       api.folders.listFolders,
@@ -72,26 +69,55 @@ export default function FileManager() {
   const filteredFolders = folders.filter((folder) =>
     folder.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // Function to navigate to a folder
   const navigateToFolder = (folderId: Id<"folders">) => {
     setSelectedFolder(folderId);
   };
-
-  // Function to navigate up one level
   const navigateUp = () => {
     if (!selectedFolder) return;
-
-    // Find the current folder to get its parent
     const currentFolder = folders.find((f) => f._id === selectedFolder);
 
     if (currentFolder && currentFolder.parent) {
       setSelectedFolder(currentFolder.parent);
     } else {
-      // If no parent or not found, go to root
       setSelectedFolder(null);
     }
   };
+
+  async function handleSendFile(file: File) {
+    if (!file || !userId) return;
+    try {
+      setIsUploading(true);
+      console.log("⬆ Upload started:", file.name);
+
+      const postUrl = await generateUploadUrl();
+
+      console.log("postUrl", postUrl);
+
+      const result = await fetch(postUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+
+      const { storageId } = await result.json();
+
+      const myFile = await sendFile({
+        name: file.name,
+        owner: userId,
+        folder: selectedFolder,
+        storageId,
+        size: file.size,
+        mimeType: file.type,
+        isPublic: false,
+        type: "document",
+      });
+      console.log("myFile", myFile);
+    } catch (err) {
+      console.error("File upload error:", err);
+    } finally {
+      setIsUploading(false);
+    }
+  }
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
@@ -142,37 +168,11 @@ export default function FileManager() {
               }
             />
             <CreateFileDialog
-              onUploadFile={async (file) => {
-                try {
-                  const userId = localStorage.getItem("userId");
-                  if (!userId) throw new Error("User not authenticated");
-                  const uploadUrl = await generateUploadUrl();
-                  const result = await fetch(uploadUrl, {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": file.type,
-                    },
-                    body: file,
-                  });
-                  const { storageId } = await result.json();
-                  await createFile({
-                    name: file.name,
-                    owner: userId as Id<"users">,
-                    folder: selectedFolder,
-                    storageId,
-                    size: file.size,
-                    mimeType: file.type,
-                    isPublic: false,
-                    type: getFileType(file.name),
-                  });
-                } catch (error) {
-                  console.error("Error uploading file:", error);
-                }
-              }}
+              onUploadFile={handleSendFile}
               trigger={
                 <Button variant="outline" size="sm">
                   <Upload className="h-4 w-4 mr-2" />
-                  Upload
+                  {isUploading ? "Uploading..." : "Upload"}
                 </Button>
               }
             />
@@ -317,23 +317,6 @@ function FileActions({
   id,
   type,
 }: { id?: Id<"files"> | Id<"folders">; type?: "file" | "folder" } = {}) {
-  const deleteFile = useMutation(api.files.deleteFile);
-  // const deleteFolder = useMutation(api.folders.deleteFolder);
-
-  // const handleDelete = async () => {
-  //   if (!id) return;
-
-  //   try {
-  //     if (type === "file") {
-  //       await deleteFile({ id: id as Id<"files"> });
-  //     } else if (type === "folder") {
-  //       await deleteFolder({ id: id as Id<"folders"> });
-  //     }
-  //   } catch (error) {
-  //     console.error(`Error deleting ${type}:`, error);
-  //   }
-  // };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

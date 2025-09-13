@@ -78,3 +78,12 @@ export const deleteFolder = mutation({
     return { success: true };
   },
 });
+export const getFolders = query({
+  args: { owner: v.id("users") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("folders")
+      .withIndex("by_owner", (q) => q.eq("owner", args.owner))
+      .collect();
+  },
+});
