@@ -4,7 +4,6 @@ import { v } from "convex/values";
 export const createFile = mutation({
   args: {
     name: v.string(),
-    // owner: v.id("users"),
     owner: v.string(),
     folder: v.union(v.id("folders"), v.null()),
     storageId: v.id("_storage"),
@@ -14,9 +13,17 @@ export const createFile = mutation({
     type: v.string(),
   },
   handler: async (ctx, args) => {
+    if (args.folder !== null) {
+      const folder = await ctx.db.get(args.folder);
+      if (!folder) {
+        throw new Error(`Folder with ID ${args.folder} does not exist`);
+      }
+    }
+
     return await ctx.db.insert("files", args);
   },
 });
+
 export const getFiles = query({
   args: { folder: v.union(v.id("folders"), v.null()) },
   handler: async (ctx, args) => {
