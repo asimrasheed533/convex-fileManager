@@ -1,11 +1,13 @@
 import './globals.css';
 
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { ConvexClientProvider } from '@/providers/convex';
 import { ThemeProvider } from '@/providers/theme';
 import { AuthProvider } from '@/hooks/use-auth';
 import Header from '@/components/Header';
+import { Toaster } from '@/components/ui/sonner';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -32,10 +34,13 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ConvexClientProvider>
           <AuthProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-              <Header />
-              {children}
-            </ThemeProvider>
+            <NuqsAdapter>
+              <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+                <Header />
+                {children}
+                <Toaster />
+              </ThemeProvider>
+            </NuqsAdapter>
           </AuthProvider>
         </ConvexClientProvider>
       </body>
