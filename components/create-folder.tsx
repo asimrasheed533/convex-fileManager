@@ -13,8 +13,11 @@ import { api } from '@/convex/_generated/api';
 
 export function CreateFolder() {
   const user = useAuth();
+
   const [open, setOpen] = useState(false);
+
   const [folderName, setFolderName] = useState('');
+
   const [isSubmitting, startSubmit] = useTransition();
 
   const createFolder = useMutation(api.folders.createFolder);
@@ -25,9 +28,12 @@ export function CreateFolder() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     startSubmit(async () => {
       await createFolder({ name: folderName, userId: user._id, parentFolderId: folderId });
+
       setFolderName('');
+
       setOpen(false);
     });
   };
