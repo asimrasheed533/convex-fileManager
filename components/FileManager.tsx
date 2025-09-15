@@ -18,10 +18,8 @@ type ViewMode = 'grid' | 'list';
 
 export default function FileManager() {
   const [selectedFolder, setSelectedFolder] = useState<Id<'folders'> | null>(null);
-
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchQuery, setSearchQuery] = useState('');
-
   const [isUploading, setIsUploading] = useState(false);
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const sendFile = useMutation(api.files.createFile);
@@ -34,21 +32,14 @@ export default function FileManager() {
     if (!file || !userId) return;
     try {
       setIsUploading(true);
-      console.log('⬆ Upload started:', file.name);
-
       const postUrl = await generateUploadUrl();
-
-      console.log('postUrl', postUrl);
-
       const result = await fetch(postUrl, {
         method: 'POST',
         headers: { 'Content-Type': file.type },
         body: file,
       });
-
       const { storageId } = await result.json();
-
-      const myFile = await sendFile({
+      await sendFile({
         name: file.name,
         owner: '123',
         folder: selectedFolder ?? null,
@@ -58,9 +49,6 @@ export default function FileManager() {
         isPublic: false,
         type: 'document',
       });
-      console.log('File uploaded:', myFile);
-      console.log('selectedFolder:', selectedFolder);
-      console.log('sending folder arg:', selectedFolder ?? null);
     } catch (err) {
       console.error('File upload error:', err);
     } finally {
@@ -116,24 +104,10 @@ export default function FileManager() {
           </div>
         </div>
         <div className="flex-1 p-4 overflow-y-auto">
-          {/* Display current path */}
-          {/* <div className="mb-4 text-sm text-muted-foreground">
-            {selectedFolder
-              ? "Folder: " +
-                (folders.find((f) => f._id === selectedFolder)?.name ||
-                  "Loading...")
-              : "Root"}
-          </div> */}
-
           {viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {/* Render folders */}
               {filteredFiles.map((folder) => (
-                <Card
-                  key={folder._id}
-                  className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                  // onClick={() => navigateToFolder(folder._id)}
-                >
+                <Card key={folder._id} className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                   <div className="bg-muted/30 p-4 flex items-center justify-center h-32">
                     <FolderOpen className="h-16 w-16 text-yellow-500" />
                   </div>
@@ -151,7 +125,6 @@ export default function FileManager() {
                 </Card>
               ))}
 
-              {/* Render files */}
               {filteredFiles.map((file) => (
                 <Card key={file._id} className="overflow-hidden hover:shadow-md transition-shadow">
                   <div className="bg-muted/30 p-4 flex items-center justify-center h-32">
@@ -175,13 +148,8 @@ export default function FileManager() {
             </div>
           ) : (
             <div className="space-y-2">
-              {/* Render folders in list view */}
               {filteredFiles.map((folder) => (
-                <div
-                  key={folder._id}
-                  className="flex items-center p-3 rounded-md hover:bg-accent/50 transition-colors cursor-pointer"
-                  // onClick={() => navigateToFolder(folder._id)}
-                >
+                <div key={folder._id} className="flex items-center p-3 rounded-md hover:bg-accent/50 transition-colors cursor-pointer">
                   <div className="mr-3">
                     <FolderOpen className="h-10 w-10 text-yellow-500" />
                   </div>
@@ -189,11 +157,9 @@ export default function FileManager() {
                     <h3 className="font-medium truncate">{folder.name}</h3>
                     <p className="text-xs text-muted-foreground">Folder</p>
                   </div>
-                  {/* <FileActions id={file._id} type="file" /> */}
                 </div>
               ))}
 
-              {/* Render files in list view */}
               {filteredFiles.map((file) => (
                 <div key={file._id} className="flex items-center p-3 rounded-md hover:bg-accent/50 transition-colors">
                   <div className="mr-3">
@@ -206,7 +172,6 @@ export default function FileManager() {
                     </p>
                   </div>
                   <div className="ml-4 text-sm text-muted-foreground">{file.type}</div>
-                  {/* <FileActions id={folder._id} type="folder" /> */}
                 </div>
               ))}
             </div>
@@ -236,7 +201,6 @@ function FileActions({ id, type }: { id?: Id<'files'> | Id<'folders'>; type?: 'f
           className="text-destructive"
           onClick={(e) => {
             e.stopPropagation();
-            // handleDelete();
           }}
         >
           <Trash2 className="h-4 w-4 mr-2" /> Delete
@@ -282,46 +246,4 @@ function Video(props: React.SVGProps<SVGSVGElement>) {
       <rect width="14" height="12" x="2" y="6" rx="2" ry="2" />
     </svg>
   );
-}
-
-// Helper function to determine file type based on extension
-function getFileType(fileName: string): string {
-  const extension = fileName.split('.').pop()?.toLowerCase() || '';
-
-  const typeMap: Record<string, string> = {
-    // Documents
-    doc: 'document',
-    docx: 'document',
-    txt: 'document',
-    rtf: 'document',
-    md: 'document',
-
-    // Spreadsheets
-    xls: 'spreadsheet',
-    xlsx: 'spreadsheet',
-    csv: 'spreadsheet',
-
-    // Presentations
-    ppt: 'presentation',
-    pptx: 'presentation',
-
-    // PDFs
-    pdf: 'pdf',
-
-    // Images
-    jpg: 'image',
-    jpeg: 'image',
-    png: 'image',
-    gif: 'image',
-    svg: 'image',
-    webp: 'image',
-
-    // Videos
-    mp4: 'video',
-    webm: 'video',
-    mov: 'video',
-    avi: 'video',
-  };
-
-  return typeMap[extension] || 'document';
 }
