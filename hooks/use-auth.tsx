@@ -1,15 +1,9 @@
-"use client";
+'use client';
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  type ReactNode,
-} from "react";
-import { useMutation } from "convex/react";
-import { api } from "../convex/_generated/api";
-import { useRouter } from "next/navigation";
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { useMutation } from 'convex/react';
+import { api } from '../convex/_generated/api';
+import { useRouter } from 'next/navigation';
 
 export interface User {
   id: string;
@@ -36,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("whiteboard-user");
+    const storedUser = localStorage.getItem('whiteboard-user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
@@ -51,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       name: res.name,
     };
     setUser(loggedInUser);
-    localStorage.setItem("whiteboard-user", JSON.stringify(loggedInUser));
+    localStorage.setItem('whiteboard-user', JSON.stringify(loggedInUser));
   };
 
   const signup = async (name: string, email: string, password: string) => {
@@ -61,21 +55,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("whiteboard-user");
-    router.push("/");
+    localStorage.removeItem('whiteboard-user');
+    router.push('/');
   };
 
-  return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isLoading }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, login, signup, logout, isLoading }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }

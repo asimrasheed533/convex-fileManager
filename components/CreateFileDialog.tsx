@@ -1,17 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useRef, DragEvent } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Upload, File } from "lucide-react";
+import { useState, useRef, DragEvent } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Upload, File } from 'lucide-react';
 
 interface CreateFileDialogProps {
   onUploadFile: (file: File) => Promise<void>;
@@ -19,11 +11,7 @@ interface CreateFileDialogProps {
   isUploading?: boolean;
 }
 
-export function CreateFileDialog({
-  onUploadFile,
-  trigger,
-  isUploading = false,
-}: CreateFileDialogProps) {
+export function CreateFileDialog({ onUploadFile, trigger, isUploading = false }: CreateFileDialogProps) {
   const [open, setOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -60,9 +48,9 @@ export function CreateFileDialog({
       await onUploadFile(selectedFile);
       setSelectedFile(null);
       setOpen(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (error) {
-      console.error("Error uploading file:", error);
+      console.error('Error uploading file:', error);
     }
   };
 
@@ -79,9 +67,7 @@ export function CreateFileDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Upload File</DialogTitle>
-          <DialogDescription>
-            Select a file from your device or drag & drop it here.
-          </DialogDescription>
+          <DialogDescription>Select a file from your device or drag & drop it here.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -90,31 +76,14 @@ export function CreateFileDialog({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={`flex flex-col items-center justify-center border-2 border-dashed rounded-2xl p-6 text-center transition cursor-pointer
-              ${
-                isDragging
-                  ? "border-blue-500 bg-blue-100"
-                  : "border-muted/50 bg-transparent"
-              }
+              ${isDragging ? 'border-blue-500 bg-blue-100' : 'border-muted/50 bg-transparent'}
             `}
           >
-            <input
-              id="file"
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              className="hidden"
-            />
-            <label
-              htmlFor="file"
-              className="flex flex-col items-center gap-2 cursor-pointer"
-            >
+            <input id="file" type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+            <label htmlFor="file" className="flex flex-col items-center gap-2 cursor-pointer">
               <Upload className="h-10 w-10 text-muted-foreground" />
-              <span className="text-sm font-medium text-muted-foreground">
-                Click to upload or drag & drop
-              </span>
-              <span className="text-xs text-muted-foreground">
-                PNG, JPG, PDF up to 10MB
-              </span>
+              <span className="text-sm font-medium text-muted-foreground">Click to upload or drag & drop</span>
+              <span className="text-xs text-muted-foreground">PNG, JPG, PDF up to 10MB</span>
             </label>
           </div>
 
@@ -123,23 +92,17 @@ export function CreateFileDialog({
               <File className="h-5 w-5 text-muted-foreground" />
               <div className="flex flex-col">
                 <span className="text-sm font-medium">{selectedFile.name}</span>
-                <span className="text-xs text-muted-foreground">
-                  {Math.round(selectedFile.size / 1024)} KB
-                </span>
+                <span className="text-xs text-muted-foreground">{Math.round(selectedFile.size / 1024)} KB</span>
               </div>
             </div>
           )}
 
           <DialogFooter className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={isUploading || !selectedFile}>
-              {isUploading ? "Uploading..." : "Upload"}
+              {isUploading ? 'Uploading...' : 'Upload'}
             </Button>
           </DialogFooter>
         </form>

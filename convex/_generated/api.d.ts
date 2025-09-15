@@ -15,7 +15,6 @@ import type {
 } from "convex/server";
 import type * as files from "../files.js";
 import type * as storage from "../storage.js";
-import type * as todo from "../todo.js";
 import type * as user from "../user.js";
 
 /**
@@ -29,7 +28,6 @@ import type * as user from "../user.js";
 declare const fullApi: ApiFromModules<{
   files: typeof files;
   storage: typeof storage;
-  todo: typeof todo;
   user: typeof user;
 }>;
 export declare const api: FilterApi<
