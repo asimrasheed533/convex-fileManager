@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { File, Trash2, Edit, MoreVertical, Grid, List, Plus, FolderOpen, ChevronRight, Search } from 'lucide-react';
 import DownloadIcon from '@/icons/DownloadIcon';
-import { CreateFolderDialog } from '@/components/CreateFolderDialog';
+import { CreateFolder } from '@/components/create-folder';
 import { UploadFile } from '@/components/upload-file';
 import { api } from '@/convex/_generated/api';
 import { Doc, Id } from '@/convex/_generated/dataModel';
@@ -42,15 +42,7 @@ export default function FileManager() {
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <CreateFolderDialog
-              onCreateFolder={() => {}}
-              trigger={
-                <Button variant="outline" size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Folder
-                </Button>
-              }
-            />
+            <CreateFolder />
             <UploadFile />
             <div className="border-l h-6 mx-2" />
             <Button variant={viewMode === 'grid' ? 'default' : 'outline'} size="icon" onClick={() => setViewMode('grid')} title="Grid View">

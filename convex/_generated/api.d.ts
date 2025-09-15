@@ -14,6 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as files from "../files.js";
+import type * as folders from "../folders.js";
 import type * as storage from "../storage.js";
 import type * as user from "../user.js";
 
@@ -27,6 +28,7 @@ import type * as user from "../user.js";
  */
 declare const fullApi: ApiFromModules<{
   files: typeof files;
+  folders: typeof folders;
   storage: typeof storage;
   user: typeof user;
 }>;

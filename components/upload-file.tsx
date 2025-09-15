@@ -8,11 +8,20 @@ import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { filesize } from 'filesize';
 import { toast } from 'sonner';
+import useAuth from '@/hooks/use-auth';
+import { parseAsString, useQueryState } from 'nuqs';
+import { Id } from '@/convex/_generated/dataModel';
 
 export function UploadFile() {
+  const user = useAuth();
+
   const [isUploading, startUploading] = useTransition();
 
   const [open, setOpen] = useState(false);
+
+  const [selectedFolder] = useQueryState('folder', parseAsString.withDefault(''));
+
+  const folderId = (selectedFolder === '' ? null : selectedFolder) as Id<'folders'>;
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -23,8 +32,6 @@ export function UploadFile() {
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
 
   const uploadfile = useMutation(api.files.uploadfile);
-
-  const userId = '123';
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -74,11 +81,11 @@ export function UploadFile() {
 
         await uploadfile({
           storageId,
-          user: userId,
+          user: user._id,
           name: selectedFile.name,
           size: selectedFile.size,
           mimeType: selectedFile.type,
-          folder: null,
+          folder: folderId,
         });
 
         setSelectedFile(null);
