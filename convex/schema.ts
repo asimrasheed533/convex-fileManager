@@ -5,27 +5,27 @@ export default defineSchema({
   users: defineTable({
     name: v.string(),
     email: v.string(),
-    passwordHash: v.string(),
+    password: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index('by_email', ['email']),
   folders: defineTable({
     name: v.string(),
-    owner: v.string(),
+    user: v.id('users'),
+    isPublic: v.boolean(),
     parent: v.union(v.id('folders'), v.null()),
-    path: v.array(v.string()),
-  }).index('by_owner', ['owner', 'parent']),
+  })
+    .index('by_user', ['user'])
+    .index('by_parent', ['parent']),
   files: defineTable({
     name: v.string(),
-    owner: v.string(),
+    user: v.id('users'),
     folder: v.union(v.id('folders'), v.null()),
     storageId: v.id('_storage'),
     size: v.number(),
     mimeType: v.string(),
     isPublic: v.boolean(),
-    type: v.string(),
   })
     .index('by_folder', ['folder'])
-    .index('by_owner', ['owner'])
-    .index('by_name_owner', ['name', 'owner']),
+    .index('by_user', ['user']),
 });

@@ -5,8 +5,6 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { ConvexClientProvider } from '@/providers/convex';
 import { ThemeProvider } from '@/providers/theme';
-import { AuthProvider } from '@/hooks/use-auth';
-import Header from '@/components/Header';
 import { Toaster } from '@/components/ui/sonner';
 
 const geistSans = Geist({
@@ -33,15 +31,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ConvexClientProvider>
-          <AuthProvider>
-            <NuqsAdapter>
-              <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-                <Header />
-                {children}
-                <Toaster />
-              </ThemeProvider>
-            </NuqsAdapter>
-          </AuthProvider>
+          <NuqsAdapter>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+              {children}
+              <Toaster />
+            </ThemeProvider>
+          </NuqsAdapter>
         </ConvexClientProvider>
       </body>
     </html>

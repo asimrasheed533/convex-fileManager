@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,20 +8,23 @@ import { File, Trash2, Edit, MoreVertical, Grid, List, Plus, FolderOpen, Chevron
 import DownloadIcon from '@/icons/DownloadIcon';
 import { CreateFolderDialog } from '@/components/CreateFolderDialog';
 import { UploadFile } from '@/components/upload-file';
-import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
-
-type ViewMode = 'grid' | 'list';
+import { Doc, Id } from '@/convex/_generated/dataModel';
+import { parseAsString, useQueryState } from 'nuqs';
+import { useQueryWithStatus } from '@/hooks/use-query';
 
 export default function FileManager() {
-  const [selectedFolder, setSelectedFolder] = useState<Id<'folders'> | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [query, setQuery] = useQueryState('q', parseAsString.withDefault(''));
 
-  const files = useQuery(api.files.getFiles, { folder: selectedFolder }) ?? [];
+  const [viewMode, setViewMode] = useQueryState('view', parseAsString.withDefault('grid'));
 
-  const filteredFiles = files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const [selectedFolder, setSelectedFolder] = useQueryState('folder', parseAsString.withDefault(''));
+
+  const folderId = (selectedFolder === '' ? null : selectedFolder) as Id<'folders'>;
+
+  const { data: files, isPending } = useQueryWithStatus(api.files.getFiles, { folder: folderId }) ?? [];
+
+  const filteredFiles = files?.filter((file) => file.name.toLowerCase().includes(query.toLowerCase()));
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
@@ -36,7 +38,7 @@ export default function FileManager() {
             )}
             <div className="relative w-64">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search files and folders..." className="pl-8" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+              <Input placeholder="Search files and folders..." className="pl-8" value={query} onChange={(e) => setQuery(e.target.value)} />
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -62,7 +64,7 @@ export default function FileManager() {
         <div className="flex-1 p-4 overflow-y-auto">
           {viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredFiles.map((folder) => (
+              {filteredFiles?.map((folder) => (
                 <Card key={folder._id} className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                   <div className="bg-muted/30 p-4 flex items-center justify-center h-32">
                     <FolderOpen className="h-16 w-16 text-yellow-500" />
@@ -81,10 +83,10 @@ export default function FileManager() {
                 </Card>
               ))}
 
-              {filteredFiles.map((file) => (
+              {filteredFiles?.map((file) => (
                 <Card key={file._id} className="overflow-hidden hover:shadow-md transition-shadow">
                   <div className="bg-muted/30 p-4 flex items-center justify-center h-32">
-                    <FileIcon type={file.type} />
+                    <FileIcon type={file.mimeType} />
                   </div>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
@@ -104,7 +106,7 @@ export default function FileManager() {
             </div>
           ) : (
             <div className="space-y-2">
-              {filteredFiles.map((folder) => (
+              {filteredFiles?.map((folder) => (
                 <div key={folder._id} className="flex items-center p-3 rounded-md hover:bg-accent/50 transition-colors cursor-pointer">
                   <div className="mr-3">
                     <FolderOpen className="h-10 w-10 text-yellow-500" />
@@ -116,10 +118,10 @@ export default function FileManager() {
                 </div>
               ))}
 
-              {filteredFiles.map((file) => (
+              {filteredFiles?.map((file) => (
                 <div key={file._id} className="flex items-center p-3 rounded-md hover:bg-accent/50 transition-colors">
                   <div className="mr-3">
-                    <FileIcon type={file.type} />
+                    <FileIcon type={file.mimeType} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium truncate">{file.name}</h3>
@@ -127,7 +129,7 @@ export default function FileManager() {
                       {file.size} • {file._creationTime}
                     </p>
                   </div>
-                  <div className="ml-4 text-sm text-muted-foreground">{file.type}</div>
+                  <div className="ml-4 text-sm text-muted-foreground">{file.mimeType}</div>
                 </div>
               ))}
             </div>

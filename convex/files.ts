@@ -1,19 +1,22 @@
 import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
 
-export const createFile = mutation({
+export const uploadfile = mutation({
   args: {
     name: v.string(),
-    owner: v.string(),
+    user: v.id('users'),
     folder: v.union(v.id('folders'), v.null()),
     storageId: v.id('_storage'),
     size: v.number(),
     mimeType: v.string(),
-    isPublic: v.boolean(),
-    type: v.string(),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert('files', args);
+    const file = await ctx.db.insert('files', {
+      ...args,
+      isPublic: false,
+    });
+
+    return file;
   },
 });
 

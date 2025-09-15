@@ -1,6 +1,13 @@
-import { mutation } from './_generated/server';
+import { mutation, query } from './_generated/server';
 import { v } from 'convex/values';
-import bcrypt from 'bcryptjs';
+
+export const getCurrentUser = query({
+  args: { userId: v.id('users') },
+  handler: async (ctx, { userId }) => {
+    const user = await ctx.db.get(userId);
+    return user;
+  },
+});
 
 export const signup = mutation({
   args: {
@@ -19,17 +26,13 @@ export const signup = mutation({
       throw new Error('User already exists with this email');
     }
 
-    const passwordHash = bcrypt.hashSync(password, 10);
-
     await ctx.db.insert('users', {
       name,
       email,
-      passwordHash,
+      password: password,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
-
-    return { success: true, message: 'User registered successfully' };
   },
 });
 
@@ -49,15 +52,12 @@ export const signIn = mutation({
       throw new Error('Invalid email or password');
     }
 
-    const isValid = bcrypt.compareSync(password, user.passwordHash);
+    const isValid = password === user.password;
+
     if (!isValid) {
       throw new Error('Invalid email or password');
     }
 
-    return {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-    };
+    return user._id;
   },
 });

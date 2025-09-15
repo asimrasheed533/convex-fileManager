@@ -1,53 +1,30 @@
 'use client';
 
-import { useState, useRef, DragEvent } from 'react';
+import { useState, useRef, DragEvent, useTransition } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Upload, File } from 'lucide-react';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
+import { filesize } from 'filesize';
+import { toast } from 'sonner';
 
 export function UploadFile() {
+  const [isUploading, startUploading] = useTransition();
+
   const [open, setOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const [isDragging, setIsDragging] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const selectedFolder = '' as Id<'folders'>;
-
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
-  const sendFile = useMutation(api.files.createFile);
-  const userId = '123';
 
-  async function onUploadFile(file: File) {
-    if (!file || !userId) return;
-    try {
-      setIsUploading(true);
-      const postUrl = await generateUploadUrl();
-      const result = await fetch(postUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': file.type },
-        body: file,
-      });
-      const { storageId } = await result.json();
-      await sendFile({
-        name: file.name,
-        owner: '123',
-        folder: selectedFolder ?? null,
-        storageId,
-        size: file.size,
-        mimeType: file.type,
-        isPublic: false,
-        type: 'document',
-      });
-    } catch (err) {
-      console.error('File upload error:', err);
-    } finally {
-      setIsUploading(false);
-    }
-  }
+  const uploadfile = useMutation(api.files.uploadfile);
+
+  const userId = '123';
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -75,18 +52,45 @@ export function UploadFile() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFile) return;
 
-    try {
-      await onUploadFile(selectedFile);
-      setSelectedFile(null);
-      setOpen(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    } catch (error) {
-      console.error('Error uploading file:', error);
-    }
+    startUploading(async () => {
+      if (!selectedFile) {
+        toast.error('Please select a file');
+        return;
+      }
+
+      try {
+        const postUrl = await generateUploadUrl();
+
+        const result = await fetch(postUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': selectedFile.type },
+          body: selectedFile,
+        });
+
+        const { storageId } = await result.json();
+
+        await uploadfile({
+          storageId,
+          user: userId,
+          name: selectedFile.name,
+          size: selectedFile.size,
+          mimeType: selectedFile.type,
+          folder: null,
+        });
+
+        setSelectedFile(null);
+
+        setOpen(false);
+
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      } catch (err) {
+        console.log(err);
+        toast.error('File upload failed');
+      }
+    });
   };
 
   return (
@@ -102,14 +106,13 @@ export function UploadFile() {
           <DialogTitle>Upload File</DialogTitle>
           <DialogDescription>Select a file from your device or drag & drop it here.</DialogDescription>
         </DialogHeader>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={`flex flex-col items-center justify-center border-2 border-dashed rounded-2xl p-6 text-center transition cursor-pointer
-              ${isDragging ? 'border-blue-500 bg-blue-100' : 'border-muted/50 bg-transparent'}
+              ${isDragging ? 'border-gray-500 bg-gray-100' : 'border-muted/50 bg-transparent'}
             `}
           >
             <input id="file" type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
@@ -119,17 +122,15 @@ export function UploadFile() {
               <span className="text-xs text-muted-foreground">PNG, JPG, PDF up to 10MB</span>
             </label>
           </div>
-
           {selectedFile && (
             <div className="flex items-center gap-3 rounded-lg border p-3 bg-muted/20">
               <File className="h-5 w-5 text-muted-foreground" />
               <div className="flex flex-col">
                 <span className="text-sm font-medium">{selectedFile.name}</span>
-                <span className="text-xs text-muted-foreground">{Math.round(selectedFile.size / 1024)} KB</span>
+                <span className="text-xs text-muted-foreground">{filesize(selectedFile.size)}</span>
               </div>
             </div>
           )}
-
           <DialogFooter className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
