@@ -12,12 +12,13 @@ import { api } from '@/convex/_generated/api';
 import { Doc, Id } from '@/convex/_generated/dataModel';
 import { parseAsString, useQueryState } from 'nuqs';
 import { useQueryWithStatus } from '@/hooks/use-query';
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { filesize } from 'filesize';
 import dayjs from 'dayjs';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { useMutation } from 'convex/react';
 
 export default function FileManager() {
   const router = useRouter();
@@ -79,8 +80,12 @@ export default function FileManager() {
             <div className="flex justify-center items-center h-full">
               <Loader className="h-8 w-8 animate-spin" />
             </div>
+          ) : !filteredFiles || filteredFiles.length === 0 ? (
+            <div className="flex justify-center items-center h-full">
+              <p className="text-muted-foreground">No files found</p>
+            </div>
           ) : (
-            <FilesWrapper>{filteredFiles?.map((entry) => (entry.type === 'folder' ? <FolderComponent key={entry._id} data={entry} /> : <FileComponent key={entry._id} data={entry} />))}</FilesWrapper>
+            <FilesWrapper>{filteredFiles.map((entry) => (entry.type === 'folder' ? <FolderComponent key={entry._id} data={entry} /> : <FileComponent key={entry._id} data={entry} />))}</FilesWrapper>
           )}
         </div>
       </div>
@@ -96,6 +101,19 @@ function FilesWrapper({ children }: { children: ReactNode }) {
 
 function FolderComponent({ data }: { data: Doc<'folders'> }) {
   const router = useRouter();
+
+  const deleteFolderMutation = useMutation(api.folders.deleteFolder);
+
+  const handleDeleteFolder = async (folderId: Id<'folders'>) => {
+    try {
+      await deleteFolderMutation({ folderId });
+      toast.success('Folder deleted successfully');
+      router.push('/dashboard');
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error(error.message || 'Failed to delete folder');
+    }
+  };
 
   const [viewMode] = useQueryState('view', parseAsString.withDefault('grid'));
 
@@ -113,7 +131,7 @@ function FolderComponent({ data }: { data: Doc<'folders'> }) {
         <DropdownMenuItem>
           <DownloadIcon className="h-4 w-4 mr-2" /> Download
         </DropdownMenuItem>
-        <DropdownMenuItem className="text-destructive">
+        <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteFolder(data._id)}>
           <Trash2 className="h-4 w-4 mr-2" /> Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
