@@ -12,6 +12,7 @@ import { api } from '@/convex/_generated/api';
 import { Doc, Id } from '@/convex/_generated/dataModel';
 import { parseAsString, useQueryState } from 'nuqs';
 import { useQueryWithStatus } from '@/hooks/use-query';
+import { ReactNode } from 'react';
 
 export default function FileManager() {
   const [query, setQuery] = useQueryState('q', parseAsString.withDefault(''));
@@ -32,7 +33,7 @@ export default function FileManager() {
         <div className="border-b p-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             {selectedFolder && (
-              <Button variant="ghost" size="icon" title="Go up one level">
+              <Button onClick={() => setSelectedFolder('')} variant="ghost" size="icon" title="Go up one level">
                 <ChevronRight className="h-4 w-4 rotate-180" />
               </Button>
             )}
@@ -58,77 +59,8 @@ export default function FileManager() {
             <div className="flex justify-center items-center h-full">
               <Loader className="h-8 w-8 animate-spin" />
             </div>
-          ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredFiles?.map((folder) => (
-                <Card key={folder._id} className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
-                  <div className="bg-muted/30 p-4 flex items-center justify-center h-32">
-                    <FolderOpen className="h-16 w-16 text-yellow-500" />
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="truncate">
-                        <h3 className="font-medium truncate" title={folder.name}>
-                          {folder.name}
-                        </h3>
-                        <p className="text-xs text-muted-foreground mt-1">Folder</p>
-                      </div>
-                      <FileActions id={folder._id} type="folder" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-
-              {filteredFiles?.map((file) => (
-                <Card key={file._id} className="overflow-hidden hover:shadow-md transition-shadow">
-                  <div className="bg-muted/30 p-4 flex items-center justify-center h-32">
-                    <FileIcon type={file.mimeType} />
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="truncate">
-                        <h3 className="font-medium truncate" title={file.name}>
-                          {file.name}
-                        </h3>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {file.size} • {file._creationTime}
-                        </p>
-                      </div>
-                      <FileActions id={file._id} type="file" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
           ) : (
-            <div className="space-y-2">
-              {filteredFiles?.map((folder) => (
-                <div key={folder._id} className="flex items-center p-3 rounded-md hover:bg-accent/50 transition-colors cursor-pointer">
-                  <div className="mr-3">
-                    <FolderOpen className="h-10 w-10 text-yellow-500" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium truncate">{folder.name}</h3>
-                    <p className="text-xs text-muted-foreground">Folder</p>
-                  </div>
-                </div>
-              ))}
-
-              {filteredFiles?.map((file) => (
-                <div key={file._id} className="flex items-center p-3 rounded-md hover:bg-accent/50 transition-colors">
-                  <div className="mr-3">
-                    <FileIcon type={file.mimeType} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium truncate">{file.name}</h3>
-                    <p className="text-xs text-muted-foreground">
-                      {file.size} • {file._creationTime}
-                    </p>
-                  </div>
-                  <div className="ml-4 text-sm text-muted-foreground">{file.mimeType}</div>
-                </div>
-              ))}
-            </div>
+            <FilesWrapper>{filteredFiles?.map((entry) => (entry.type === 'folder' ? <FolderComponent key={entry._id} data={entry} /> : <FileComponent key={entry._id} data={entry} />))}</FilesWrapper>
           )}
         </div>
       </div>
@@ -136,8 +68,18 @@ export default function FileManager() {
   );
 }
 
-function FileActions({ id, type }: { id?: Id<'files'> | Id<'folders'>; type?: 'file' | 'folder' } = {}) {
-  return (
+function FilesWrapper({ children }: { children: ReactNode }) {
+  const [viewMode] = useQueryState('view', parseAsString.withDefault('grid'));
+
+  return viewMode === 'grid' ? <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">{children}</div> : <div className="space-y-2">{children}</div>;
+}
+
+function FolderComponent({ data }: { data: Doc<'folders'> }) {
+  const [viewMode] = useQueryState('view', parseAsString.withDefault('grid'));
+
+  const [, setSelectedFolder] = useQueryState('folder', parseAsString.withDefault(''));
+
+  const actions = (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -151,16 +93,100 @@ function FileActions({ id, type }: { id?: Id<'files'> | Id<'folders'>; type?: 'f
         <DropdownMenuItem>
           <DownloadIcon className="h-4 w-4 mr-2" /> Download
         </DropdownMenuItem>
-        <DropdownMenuItem
-          className="text-destructive"
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-        >
+        <DropdownMenuItem className="text-destructive">
           <Trash2 className="h-4 w-4 mr-2" /> Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+
+  return viewMode === 'grid' ? (
+    <Card key={data._id} onDoubleClick={() => setSelectedFolder(data._id.toString())} className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+      <div className="bg-muted/30 p-4 flex items-center justify-center h-32">
+        <FolderOpen className="h-16 w-16 text-yellow-500" />
+      </div>
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between">
+          <div className="truncate">
+            <h3 className="font-medium truncate" title={data.name}>
+              {data.name}
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1">Folder</p>
+          </div>
+          {actions}
+        </div>
+      </CardContent>
+    </Card>
+  ) : (
+    <div key={data._id} className="flex items-center p-3 rounded-md hover:bg-accent/50 transition-colors cursor-pointer">
+      <div className="mr-3">
+        <FolderOpen className="h-10 w-10 text-yellow-500" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="font-medium truncate">{data.name}</h3>
+        <p className="text-xs text-muted-foreground">Folder</p>
+      </div>
+      {actions}
+    </div>
+  );
+}
+
+function FileComponent({ data }: { data: Doc<'files'> }) {
+  const [viewMode] = useQueryState('view', parseAsString.withDefault('grid'));
+
+  const actions = (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+          <MoreVertical className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem>
+          <Edit className="h-4 w-4 mr-2" /> Rename
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <DownloadIcon className="h-4 w-4 mr-2" /> Download
+        </DropdownMenuItem>
+        <DropdownMenuItem className="text-destructive">
+          <Trash2 className="h-4 w-4 mr-2" /> Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  return viewMode === 'grid' ? (
+    <Card key={data._id} className="overflow-hidden hover:shadow-md transition-shadow">
+      <div className="bg-muted/30 p-4 flex items-center justify-center h-32">
+        <FileIcon type={data.mimeType} />
+      </div>
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between">
+          <div className="truncate">
+            <h3 className="font-medium truncate" title={data.name}>
+              {data.name}
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              {data.size} • {data._creationTime}
+            </p>
+          </div>
+          {actions}
+        </div>
+      </CardContent>
+    </Card>
+  ) : (
+    <div key={data._id} className="flex items-center p-3 rounded-md hover:bg-accent/50 transition-colors">
+      <div className="mr-3">
+        <FileIcon type={data.mimeType} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="font-medium truncate">{data.name}</h3>
+        <p className="text-xs text-muted-foreground">
+          {data.size} • {data._creationTime}
+        </p>
+      </div>
+      {actions}
+    </div>
   );
 }
 
