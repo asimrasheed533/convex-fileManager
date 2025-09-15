@@ -14,6 +14,8 @@ import { parseAsString, useQueryState } from 'nuqs';
 import { useQueryWithStatus } from '@/hooks/use-query';
 import { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { filesize } from 'filesize';
+import dayjs from 'dayjs';
 
 export default function FileManager() {
   const router = useRouter();
@@ -114,7 +116,7 @@ function FolderComponent({ data }: { data: Doc<'folders'> }) {
             <h3 className="font-medium truncate" title={data.name}>
               {data.name}
             </h3>
-            <p className="text-xs text-muted-foreground mt-1">Folder</p>
+            <p className="text-xs text-muted-foreground mt-1">Created {dayjs(data._creationTime).format('MMMM D, YYYY')}</p>
           </div>
           {actions}
         </div>
@@ -127,7 +129,7 @@ function FolderComponent({ data }: { data: Doc<'folders'> }) {
       </div>
       <div className="flex-1 min-w-0">
         <h3 className="font-medium truncate">{data.name}</h3>
-        <p className="text-xs text-muted-foreground">Folder</p>
+        <p className="text-xs text-muted-foreground">Created {dayjs(data._creationTime).format('MMMM D, YYYY')}</p>
       </div>
       {actions}
     </div>
@@ -170,7 +172,7 @@ function FileComponent({ data }: { data: Doc<'files'> }) {
               {data.name}
             </h3>
             <p className="text-xs text-muted-foreground mt-1">
-              {data.size} • {data._creationTime}
+              {filesize(data.size)} • {dayjs(data._creationTime).format('MMMM D, YYYY')}
             </p>
           </div>
           {actions}
@@ -185,7 +187,7 @@ function FileComponent({ data }: { data: Doc<'files'> }) {
       <div className="flex-1 min-w-0">
         <h3 className="font-medium truncate">{data.name}</h3>
         <p className="text-xs text-muted-foreground">
-          {data.size} • {data._creationTime}
+          {filesize(data.size)} • {dayjs(data._creationTime).format('MMMM D, YYYY')}
         </p>
       </div>
       {actions}
