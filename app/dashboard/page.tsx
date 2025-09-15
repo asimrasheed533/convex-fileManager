@@ -1,5 +1,5 @@
-import FileManager from '@/components/FileManager';
-import Header from '@/components/Header';
+import FileManager from '@/components/file-manager';
+import Header from '@/components/header';
 import { cookies } from 'next/headers';
 import { fetchQuery } from 'convex/nextjs';
 import { api } from '@/convex/_generated/api';
