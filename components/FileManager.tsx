@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { File, Trash2, Edit, MoreVertical, Grid, List, Plus, FolderOpen, ChevronRight, Search, Loader } from 'lucide-react';
+import { File, Trash2, Edit, MoreVertical, Grid, List, FolderOpen, ChevronRight, Search, Loader } from 'lucide-react';
 import DownloadIcon from '@/icons/DownloadIcon';
 import { CreateFolder } from '@/components/create-folder';
 import { UploadFile } from '@/components/upload-file';
@@ -13,13 +13,16 @@ import { Doc, Id } from '@/convex/_generated/dataModel';
 import { parseAsString, useQueryState } from 'nuqs';
 import { useQueryWithStatus } from '@/hooks/use-query';
 import { ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function FileManager() {
+  const router = useRouter();
+
   const [query, setQuery] = useQueryState('q', parseAsString.withDefault(''));
 
   const [viewMode, setViewMode] = useQueryState('view', parseAsString.withDefault('grid'));
 
-  const [selectedFolder, setSelectedFolder] = useQueryState('folder', parseAsString.withDefault(''));
+  const [selectedFolder] = useQueryState('folder', parseAsString.withDefault(''));
 
   const folderId = (selectedFolder === '' ? null : selectedFolder) as Id<'folders'>;
 
@@ -33,7 +36,7 @@ export default function FileManager() {
         <div className="border-b p-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             {selectedFolder && (
-              <Button onClick={() => setSelectedFolder('')} variant="ghost" size="icon" title="Go up one level">
+              <Button onClick={() => router.back()} variant="ghost" size="icon" title="Go up one level">
                 <ChevronRight className="h-4 w-4 rotate-180" />
               </Button>
             )}
@@ -75,9 +78,9 @@ function FilesWrapper({ children }: { children: ReactNode }) {
 }
 
 function FolderComponent({ data }: { data: Doc<'folders'> }) {
-  const [viewMode] = useQueryState('view', parseAsString.withDefault('grid'));
+  const router = useRouter();
 
-  const [, setSelectedFolder] = useQueryState('folder', parseAsString.withDefault(''));
+  const [viewMode] = useQueryState('view', parseAsString.withDefault('grid'));
 
   const actions = (
     <DropdownMenu>
@@ -101,7 +104,7 @@ function FolderComponent({ data }: { data: Doc<'folders'> }) {
   );
 
   return viewMode === 'grid' ? (
-    <Card key={data._id} onDoubleClick={() => setSelectedFolder(data._id.toString())} className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+    <Card key={data._id} onDoubleClick={() => router.push(`/dashboard?folder=${data._id.toString()}`)} className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
       <div className="bg-muted/30 p-4 flex items-center justify-center h-32">
         <FolderOpen className="h-16 w-16 text-yellow-500" />
       </div>
