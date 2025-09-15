@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 export default function Header() {
   const { user, logout, isLoading } = useAuth();
   const router = useRouter();
+
   return (
     <header className="w-full flex items-center justify-between px-6 py-4 border-b bg-background">
       <div className="text-xl font-bold">WhiteBoard Pro</div>
