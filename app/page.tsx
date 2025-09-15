@@ -1,6 +1,6 @@
 import { LoginForm } from '@/components/login-form';
 
-export default function HomePage() {
+export default function Login() {
   return (
     <div className="min-h-screen bg-bg-background from-slate-50 to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
