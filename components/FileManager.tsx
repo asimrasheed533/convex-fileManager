@@ -94,12 +94,7 @@ export default function FileManager() {
         <div className="border-b p-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             {selectedFolder && (
-              <Button
-                variant="ghost"
-                size="icon"
-                // onClick={navigateUp}
-                title="Go up one level"
-              >
+              <Button variant="ghost" size="icon" title="Go up one level">
                 <ChevronRight className="h-4 w-4 rotate-180" />
               </Button>
             )}

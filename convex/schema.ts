@@ -28,9 +28,4 @@ export default defineSchema({
     .index("by_folder", ["folder"])
     .index("by_owner", ["owner"])
     .index("by_name_owner", ["name", "owner"]),
-  todo: defineTable({
-    task: v.string(),
-    completed: v.boolean(),
-    createdAt: v.string(),
-  }),
 });

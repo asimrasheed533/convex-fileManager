@@ -13,13 +13,6 @@ export const createFile = mutation({
     type: v.string(),
   },
   handler: async (ctx, args) => {
-    if (args.folder !== null) {
-      const folder = await ctx.db.get(args.folder);
-      if (!folder) {
-        throw new Error(`Folder with ID ${args.folder} does not exist`);
-      }
-    }
-
     return await ctx.db.insert("files", args);
   },
 });

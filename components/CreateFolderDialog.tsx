@@ -28,21 +28,21 @@ export function CreateFolderDialog({
   const [folderName, setFolderName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!folderName.trim()) return;
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!folderName.trim()) return;
 
-    setIsSubmitting(true);
-    try {
-      await onCreateFolder(folderName.trim());
-      setFolderName("");
-      setOpen(false);
-    } catch (error) {
-      console.error("Error creating folder:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  //   setIsSubmitting(true);
+  //   try {
+  //     await onCreateFolder(folderName.trim());
+  //     setFolderName("");
+  //     setOpen(false);
+  //   } catch (error) {
+  //     console.error("Error creating folder:", error);
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -61,7 +61,7 @@ export function CreateFolderDialog({
             Enter a name for your new folder.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={() => {}}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="folderName" className="text-right">
