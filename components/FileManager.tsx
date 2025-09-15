@@ -5,12 +5,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { File, Upload, Trash2, Edit, MoreVertical, Grid, List, Plus, FolderOpen, ChevronRight, Search } from 'lucide-react';
+import { File, Trash2, Edit, MoreVertical, Grid, List, Plus, FolderOpen, ChevronRight, Search } from 'lucide-react';
 import DownloadIcon from '@/icons/DownloadIcon';
 import { CreateFolderDialog } from '@/components/CreateFolderDialog';
-import { CreateFileDialog } from '@/components/CreateFileDialog';
-
-import { useQuery, useMutation } from 'convex/react';
+import { UploadFile } from '@/components/upload-file';
+import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 
@@ -20,41 +19,10 @@ export default function FileManager() {
   const [selectedFolder, setSelectedFolder] = useState<Id<'folders'> | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
-  const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
-  const sendFile = useMutation(api.files.createFile);
-  const userId = '123';
+
   const files = useQuery(api.files.getFiles, { folder: selectedFolder }) ?? [];
 
   const filteredFiles = files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase()));
-
-  async function handleSendFile(file: File) {
-    if (!file || !userId) return;
-    try {
-      setIsUploading(true);
-      const postUrl = await generateUploadUrl();
-      const result = await fetch(postUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': file.type },
-        body: file,
-      });
-      const { storageId } = await result.json();
-      await sendFile({
-        name: file.name,
-        owner: '123',
-        folder: selectedFolder ?? null,
-        storageId,
-        size: file.size,
-        mimeType: file.type,
-        isPublic: false,
-        type: 'document',
-      });
-    } catch (err) {
-      console.error('File upload error:', err);
-    } finally {
-      setIsUploading(false);
-    }
-  }
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
@@ -81,19 +49,7 @@ export default function FileManager() {
                 </Button>
               }
             />
-            <CreateFileDialog
-              onUploadFile={handleSendFile}
-              isUploading={isUploading}
-              trigger={
-                <Button variant="outline" size="sm">
-                  <Upload className="h-4 w-4 mr-2" />
-                  {isUploading ? 'Uploading...' : 'Upload'}
-                </Button>
-              }
-            />
-            <Button variant="outline" size="icon" title="Edit">
-              <Edit className="h-4 w-4" />
-            </Button>
+            <UploadFile />
             <div className="border-l h-6 mx-2" />
             <Button variant={viewMode === 'grid' ? 'default' : 'outline'} size="icon" onClick={() => setViewMode('grid')} title="Grid View">
               <Grid className="h-4 w-4" />
