@@ -1,8 +1,9 @@
+import './globals.css';
+
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import './globals.css';
-import { ConvexClientProvider } from '@/components/convex-provider';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ConvexClientProvider } from '@/providers/convex';
+import { ThemeProvider } from '@/providers/theme';
 import { AuthProvider } from '@/hooks/use-auth';
 import Header from '@/components/Header';
 
