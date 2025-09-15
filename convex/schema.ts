@@ -25,6 +25,7 @@ export default defineSchema({
     size: v.number(),
     mimeType: v.string(),
     isPublic: v.boolean(),
+    originalFile: v.optional(v.id('files')),
   })
     .index('by_folder', ['folder'])
     .index('by_user', ['user']),

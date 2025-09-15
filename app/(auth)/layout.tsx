@@ -12,13 +12,13 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
   const token = cookie.get('token')?.value;
 
   if (token) {
+    const user = await fetchQuery(api.user.getCurrentUser, { userId: token as Id<'users'> });
+
+    if (!user) {
+      await clearToken();
+    }
+
     return redirect('/dashboard');
-  }
-
-  const user = await fetchQuery(api.user.getCurrentUser, { userId: token as Id<'users'> });
-
-  if (!user) {
-    await clearToken();
   }
 
   return children;

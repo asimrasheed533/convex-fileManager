@@ -45,3 +45,21 @@ export const getFiles = query({
     ];
   },
 });
+
+export const getFile = query({
+  args: { fileId: v.id('files') },
+  handler: async (ctx, args) => {
+    const file = await ctx.db.get(args.fileId);
+
+    if (!file) {
+      throw new Error('File not found');
+    }
+
+    const fileUrl = await ctx.storage.getUrl(file.storageId);
+
+    return {
+      ...file,
+      fileUrl,
+    };
+  },
+});

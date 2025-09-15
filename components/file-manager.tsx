@@ -12,13 +12,28 @@ import { api } from '@/convex/_generated/api';
 import { Doc, Id } from '@/convex/_generated/dataModel';
 import { parseAsString, useQueryState } from 'nuqs';
 import { useQueryWithStatus } from '@/hooks/use-query';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { filesize } from 'filesize';
 import dayjs from 'dayjs';
+import { useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
 
 export default function FileManager() {
   const router = useRouter();
+
+  const searchParams = useSearchParams();
+
+  const error = searchParams.get('error');
+
+  useEffect(() => {
+    if (error) {
+      setTimeout(() => {
+        console.log(error);
+        toast.error(error);
+      }, 1000);
+    }
+  }, [error]);
 
   const [query, setQuery] = useQueryState('q', parseAsString.withDefault(''));
 
@@ -123,7 +138,7 @@ function FolderComponent({ data }: { data: Doc<'folders'> }) {
       </CardContent>
     </Card>
   ) : (
-    <div key={data._id} className="flex items-center p-3 rounded-md hover:bg-accent/50 transition-colors cursor-pointer">
+    <div key={data._id} onDoubleClick={() => router.push(`/dashboard?folder=${data._id.toString()}`)} className="flex items-center p-3 rounded-md hover:bg-accent/50 transition-colors cursor-pointer">
       <div className="mr-3">
         <FolderOpen className="h-10 w-10 text-yellow-500" />
       </div>
@@ -137,6 +152,8 @@ function FolderComponent({ data }: { data: Doc<'folders'> }) {
 }
 
 function FileComponent({ data }: { data: Doc<'files'> }) {
+  const router = useRouter();
+
   const [viewMode] = useQueryState('view', parseAsString.withDefault('grid'));
 
   const actions = (
@@ -161,7 +178,7 @@ function FileComponent({ data }: { data: Doc<'files'> }) {
   );
 
   return viewMode === 'grid' ? (
-    <Card key={data._id} className="overflow-hidden hover:shadow-md transition-shadow">
+    <Card key={data._id} onDoubleClick={() => router.push(`/dashboard/${data._id.toString()}`)} className="overflow-hidden hover:shadow-md transition-shadow">
       <div className="bg-muted/30 p-4 flex items-center justify-center h-32">
         <FileIcon type={data.mimeType} />
       </div>
@@ -180,7 +197,7 @@ function FileComponent({ data }: { data: Doc<'files'> }) {
       </CardContent>
     </Card>
   ) : (
-    <div key={data._id} className="flex items-center p-3 rounded-md hover:bg-accent/50 transition-colors">
+    <div key={data._id} onDoubleClick={() => router.push(`/dashboard/${data._id.toString()}`)} className="flex items-center p-3 rounded-md hover:bg-accent/50 transition-colors">
       <div className="mr-3">
         <FileIcon type={data.mimeType} />
       </div>
