@@ -17,22 +17,6 @@ export function CreateFolderDialog({ onCreateFolder, trigger }: CreateFolderDial
   const [folderName, setFolderName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (!folderName.trim()) return;
-
-  //   setIsSubmitting(true);
-  //   try {
-  //     await onCreateFolder(folderName.trim());
-  //     setFolderName("");
-  //     setOpen(false);
-  //   } catch (error) {
-  //     console.error("Error creating folder:", error);
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
