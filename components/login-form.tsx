@@ -25,24 +25,20 @@ export function LoginForm() {
             <Label htmlFor="email">Email</Label>
             <Input id="email" type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 border-amber-50" />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-11 border-amber-50" />
           </div>
-
           {isSignUp && (
             <div className="space-y-2">
               <Label htmlFor="tenant">Workspace Name</Label>
               <Input id="tenant" type="text" placeholder="Your Company" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 border-amber-50" />
             </div>
           )}
-
           <Button type="submit" className="w-full h-11 bg-blue-600 hover:bg-blue-700">
             {isSignUp ? 'Create Workspace' : 'Sign In'}
           </Button>
         </form>
-
         <div className="mt-6 text-center">
           <button type="button" onClick={() => setIsSignUp(!isSignUp)} className="text-sm text-blue-600 hover:text-blue-700 font-medium">
             {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Create one"}
