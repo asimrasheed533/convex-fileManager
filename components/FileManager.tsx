@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { File, Trash2, Edit, MoreVertical, Grid, List, Plus, FolderOpen, ChevronRight, Search } from 'lucide-react';
+import { File, Trash2, Edit, MoreVertical, Grid, List, Plus, FolderOpen, ChevronRight, Search, Loader } from 'lucide-react';
 import DownloadIcon from '@/icons/DownloadIcon';
 import { CreateFolder } from '@/components/create-folder';
 import { UploadFile } from '@/components/upload-file';
@@ -54,7 +54,11 @@ export default function FileManager() {
           </div>
         </div>
         <div className="flex-1 p-4 overflow-y-auto">
-          {viewMode === 'grid' ? (
+          {isPending ? (
+            <div className="flex justify-center items-center h-full">
+              <Loader className="h-8 w-8 animate-spin" />
+            </div>
+          ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {filteredFiles?.map((folder) => (
                 <Card key={folder._id} className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
