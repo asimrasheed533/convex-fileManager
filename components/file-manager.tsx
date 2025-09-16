@@ -19,6 +19,7 @@ import dayjs from 'dayjs';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { useMutation } from 'convex/react';
+import FilesWrapper from './file-warper';
 
 export default function FileManager() {
   const router = useRouter();
@@ -91,12 +92,6 @@ export default function FileManager() {
       </div>
     </div>
   );
-}
-
-function FilesWrapper({ children }: { children: ReactNode }) {
-  const [viewMode] = useQueryState('view', parseAsString.withDefault('grid'));
-
-  return viewMode === 'grid' ? <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">{children}</div> : <div className="space-y-2">{children}</div>;
 }
 
 function FolderComponent({ data }: { data: Doc<'folders'> }) {
@@ -172,6 +167,18 @@ function FolderComponent({ data }: { data: Doc<'folders'> }) {
 function FileComponent({ data }: { data: Doc<'files'> }) {
   const router = useRouter();
 
+  const handleFileMutation = useMutation(api.files.deleteFile);
+
+  const handleDeleteFile = async (fileId: Id<'files'>) => {
+    try {
+      await handleFileMutation({ fileId });
+      toast.success('File deleted successfully');
+    } catch (err: unknown) {
+      const error = err as Error;
+      toast.error(error.message || 'Failed to deleted file');
+    }
+  };
+
   const [viewMode] = useQueryState('view', parseAsString.withDefault('grid'));
 
   const actions = (
@@ -188,7 +195,7 @@ function FileComponent({ data }: { data: Doc<'files'> }) {
         <DropdownMenuItem>
           <DownloadIcon className="h-4 w-4 mr-2" /> Download
         </DropdownMenuItem>
-        <DropdownMenuItem className="text-destructive">
+        <DropdownMenuItem onClick={() => handleDeleteFile(data._id)} className="text-destructive">
           <Trash2 className="h-4 w-4 mr-2" /> Delete
         </DropdownMenuItem>
       </DropdownMenuContent>
