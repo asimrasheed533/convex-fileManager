@@ -17,6 +17,8 @@ export function UploadFile() {
 
   const [isUploading, startUploading] = useTransition();
 
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+
   const [open, setOpen] = useState(false);
 
   const [selectedFolder] = useQueryState('folder', parseAsString.withDefault(''));
@@ -71,31 +73,52 @@ export function UploadFile() {
       try {
         const postUrl = await generateUploadUrl();
 
-        const result = await fetch(postUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': selectedFile.type },
-          body: selectedFile,
+        await new Promise<void>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+
+          xhr.open('POST', postUrl, true);
+          xhr.setRequestHeader('Content-Type', selectedFile.type);
+
+          // 📊 Track upload progress
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const percent = Math.round((event.loaded / event.total) * 100);
+              setUploadProgress(percent);
+            }
+          };
+
+          xhr.onload = async () => {
+            if (xhr.status === 200) {
+              const { storageId } = JSON.parse(xhr.responseText);
+
+              await uploadfile({
+                storageId,
+                user: user._id,
+                name: selectedFile.name,
+                size: selectedFile.size,
+                mimeType: selectedFile.type,
+                folder: folderId,
+              });
+
+              setSelectedFile(null);
+              setOpen(false);
+              setUploadProgress(0);
+
+              if (fileInputRef.current) fileInputRef.current.value = '';
+              toast.success('File uploaded successfully');
+              resolve();
+            } else {
+              reject(new Error('Upload failed'));
+            }
+          };
+
+          xhr.onerror = () => reject(new Error('Upload failed'));
+          xhr.send(selectedFile);
         });
-
-        const { storageId } = await result.json();
-
-        await uploadfile({
-          storageId,
-          user: user._id,
-          name: selectedFile.name,
-          size: selectedFile.size,
-          mimeType: selectedFile.type,
-          folder: folderId,
-        });
-
-        setSelectedFile(null);
-
-        setOpen(false);
-
-        if (fileInputRef.current) fileInputRef.current.value = '';
       } catch (err) {
-        console.log(err);
+        console.error(err);
         toast.error('File upload failed');
+        setUploadProgress(0);
       }
     });
   };
@@ -146,6 +169,12 @@ export function UploadFile() {
               {isUploading ? 'Uploading...' : 'Upload'}
             </Button>
           </DialogFooter>
+          {uploadProgress > 0 && (
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+              <div className="bg-blue-600 h-2 rounded-full transition-all duration-200" style={{ width: `${uploadProgress}%` }}></div>
+              <p className="text-xs text-gray-600 mt-1 text-right">{uploadProgress}%</p>
+            </div>
+          )}
         </form>
       </DialogContent>
     </Dialog>
