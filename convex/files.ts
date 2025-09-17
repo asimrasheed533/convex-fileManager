@@ -63,6 +63,22 @@ export const getFile = query({
   },
 });
 
+export const editFile = mutation({
+  args: {
+    fileId: v.id('files'),
+    name: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const file = await ctx.db.get(args.fileId);
+    if (!file) {
+      throw new Error('File not found');
+    }
+    await ctx.db.patch(args.fileId, { name: args.name });
+    const updatedFile = await ctx.db.get(args.fileId);
+    return updatedFile;
+  },
+});
+
 export const deleteFile = mutation({
   args: { fileId: v.id('files') },
   handler: async (ctx, args) => {

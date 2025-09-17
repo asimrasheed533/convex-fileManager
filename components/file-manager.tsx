@@ -20,6 +20,7 @@ import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { useMutation } from 'convex/react';
 import FilesWrapper from './file-warper';
+import { RenameFile } from './rename-file';
 
 export default function FileManager() {
   const router = useRouter();
@@ -123,9 +124,7 @@ function FolderComponent({ data }: { data: Doc<'folders'> }) {
         <DropdownMenuItem>
           <Edit className="h-4 w-4 mr-2" /> Rename
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <DownloadIcon className="h-4 w-4 mr-2" /> Download
-        </DropdownMenuItem>
+
         <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteFolder(data._id)}>
           <Trash2 className="h-4 w-4 mr-2" /> Delete
         </DropdownMenuItem>
@@ -190,7 +189,7 @@ function FileComponent({ data }: { data: Doc<'files'> }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem>
-          <Edit className="h-4 w-4 mr-2" /> Rename
+          <RenameFile fileId={data._id} currentName={data.name} onUpdated={(newName) => console.log('File renamed to', newName)} />
         </DropdownMenuItem>
         <DropdownMenuItem>
           <DownloadIcon className="h-4 w-4 mr-2" /> Download
