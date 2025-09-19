@@ -1,5 +1,4 @@
 import FileManager from '@/components/file-manager';
-import Header from '@/components/header';
 import { cookies } from 'next/headers';
 import { fetchQuery } from 'convex/nextjs';
 import { api } from '@/convex/_generated/api';
@@ -24,7 +23,6 @@ export default async function Dashboard() {
 
   return (
     <AuthProvider user={user}>
-      <Header />
       <FileManager />
     </AuthProvider>
   );
