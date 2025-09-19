@@ -63,6 +63,14 @@ export const getFile = query({
   },
 });
 
+export const generateDownloadUrl = query({
+  args: { storageId: v.id('_storage') },
+  handler: async (ctx, args) => {
+    const url = await ctx.storage.getUrl(args.storageId);
+    return url;
+  },
+});
+
 export const editFile = mutation({
   args: {
     fileId: v.id('files'),

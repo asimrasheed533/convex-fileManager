@@ -18,7 +18,7 @@ import { filesize } from 'filesize';
 import dayjs from 'dayjs';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import FilesWrapper from './file-warper';
 import { RenameFile } from './rename-file';
 
@@ -60,8 +60,8 @@ export default function FileManager() {
                 <ChevronRight className="h-4 w-4 rotate-180" />
               </Button>
             )}
+            <Search className="left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <div className="relative w-64">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Search files and folders..." className="pl-8" value={query} onChange={(e) => setQuery(e.target.value)} />
             </div>
           </div>
@@ -165,6 +165,8 @@ function FolderComponent({ data }: { data: Doc<'folders'> }) {
 
 function FileComponent({ data }: { data: Doc<'files'> }) {
   const router = useRouter();
+  const url = useQuery(api.files.generateDownloadUrl, { storageId: data.storageId });
+  const [viewMode] = useQueryState('view', parseAsString.withDefault('grid'));
 
   const handleFileMutation = useMutation(api.files.deleteFile);
 
@@ -178,7 +180,27 @@ function FileComponent({ data }: { data: Doc<'files'> }) {
     }
   };
 
-  const [viewMode] = useQueryState('view', parseAsString.withDefault('grid'));
+  const handleDownload = async () => {
+    if (!url) {
+      toast.error('Download link not available.');
+      return;
+    }
+
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = data.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    } catch (err) {
+      toast.error('Failed to download file.');
+    }
+  };
 
   const actions = (
     <DropdownMenu>
@@ -191,7 +213,7 @@ function FileComponent({ data }: { data: Doc<'files'> }) {
         <DropdownMenuItem>
           <RenameFile fileId={data._id} currentName={data.name} onUpdated={(newName) => console.log('File renamed to', newName)} />
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleDownload}>
           <DownloadIcon className="h-4 w-4 mr-2" /> Download
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleDeleteFile(data._id)} className="text-destructive">
