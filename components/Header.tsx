@@ -32,7 +32,7 @@ export default function Header() {
           variant="outline"
           onClick={() => {
             toast('Redirecting to chat...');
-            router.push('/chat');
+            router.push('/dashboard/chat');
           }}
         >
           Chat

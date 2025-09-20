@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import { Contact } from '@/types';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import ChatBox from '@/components/chat/chat-box';
+import { Button } from '@/components/ui/button';
+import { Menu } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -106,6 +108,9 @@ export default function ChatLayout() {
         ) : (
           <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-800">
             <div className="text-center text-gray-500 dark:text-gray-400">
+              <Button variant="default" size="sm" className="md:hidden" onClick={() => setIsSidebarOpen(true)}>
+                open Menu Click Here
+              </Button>
               <div className="text-6xl mb-4">💬</div>
               <h2 className="text-xl font-medium mb-2">Welcome to Chat</h2>
               <p>Select a conversation to start messaging</p>

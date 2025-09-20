@@ -10,6 +10,7 @@ import { Contact } from '@/types';
 import { ScrollArea } from '../ui/scroll-area';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
+import NewGroupModal from '../new-group-modal';
 
 interface ChatSidebarProps {
   contacts: Contact[];
@@ -42,6 +43,7 @@ export function ChatSidebar({ contacts, selectedContact, onContactSelect, isOpen
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input placeholder="Search conversations..." className="pl-10 bg-background/50 border-border/50" value={query} onChange={(e) => setQuery(e.target.value)} />
         </div>
+        <NewGroupModal />
       </div>
       <ScrollArea className={cn('flex-1 overflow-y-auto', 'max-h-[calc(100vh-8rem)]', 'md:max-h-none')}>
         <div className="p-2">

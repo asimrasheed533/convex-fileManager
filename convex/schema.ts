@@ -17,9 +17,13 @@ export default defineSchema({
     isUsed: v.boolean(),
     expiresAt: v.number(),
     createdAt: v.number(),
-  }).index('by_code', ['code']),
+    chat: v.id('chats'),
+  })
+    .index('by_code', ['code'])
+    .index('by_chat', ['chat']),
 
   chats: defineTable({
+    name: v.optional(v.string()),
     participants: v.array(v.id('users')),
     createdAt: v.number(),
   }),
