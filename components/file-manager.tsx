@@ -12,11 +12,10 @@ import { api } from '@/convex/_generated/api';
 import { Doc, Id } from '@/convex/_generated/dataModel';
 import { parseAsString, useQueryState } from 'nuqs';
 import { useQueryWithStatus } from '@/hooks/use-query';
-import { ReactNode, useEffect, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { filesize } from 'filesize';
 import dayjs from 'dayjs';
-import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { useMutation, useQuery } from 'convex/react';
 import FilesWrapper from './file-warper';
@@ -24,7 +23,6 @@ import { RenameFile } from './rename-file';
 
 export default function FileManager() {
   const router = useRouter();
-
   const searchParams = useSearchParams();
 
   const error = searchParams.get('error');
@@ -44,7 +42,7 @@ export default function FileManager() {
 
   const [selectedFolder] = useQueryState('folder', parseAsString.withDefault(''));
 
-  const folderId = (selectedFolder === '' ? null : selectedFolder) as Id<'folders'>;
+  const folderId = selectedFolder === '' ? null : (selectedFolder as Id<'folders'>);
 
   const { data: files, isPending } = useQueryWithStatus(api.files.getFiles, { folder: folderId }) ?? [];
 
@@ -97,7 +95,6 @@ export default function FileManager() {
 
 function FolderComponent({ data }: { data: Doc<'folders'> }) {
   const router = useRouter();
-
   const deleteFolderMutation = useMutation(api.folders.deleteFolder);
 
   const handleDeleteFolder = async (folderId: Id<'folders'>) => {
@@ -105,9 +102,9 @@ function FolderComponent({ data }: { data: Doc<'folders'> }) {
       await deleteFolderMutation({ folderId });
       toast.success('Folder deleted successfully');
       router.push('/dashboard');
-    } catch (err: unknown) {
-      const error = err as Error;
-      toast.error(error.message || 'Failed to delete folder');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete folder';
+      toast.error(errorMessage);
     }
   };
 
@@ -165,7 +162,9 @@ function FolderComponent({ data }: { data: Doc<'folders'> }) {
 
 function FileComponent({ data }: { data: Doc<'files'> }) {
   const router = useRouter();
-  const url = useQuery(api.files.generateDownloadUrl, { storageId: data.storageId });
+  const url = useQuery(api.files.generateDownloadUrl, {
+    storageId: data.storageId,
+  });
   const [viewMode] = useQueryState('view', parseAsString.withDefault('grid'));
 
   const handleFileMutation = useMutation(api.files.deleteFile);
@@ -174,9 +173,9 @@ function FileComponent({ data }: { data: Doc<'files'> }) {
     try {
       await handleFileMutation({ fileId });
       toast.success('File deleted successfully');
-    } catch (err: unknown) {
-      const error = err as Error;
-      toast.error(error.message || 'Failed to deleted file');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete file';
+      toast.error(errorMessage);
     }
   };
 
@@ -197,8 +196,9 @@ function FileComponent({ data }: { data: Doc<'files'> }) {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(link.href);
-    } catch (err) {
-      toast.error('Failed to download file.');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to download file.';
+      toast.error(errorMessage);
     }
   };
 
@@ -269,17 +269,29 @@ function FileIcon({ type }: { type: string }) {
     case 'pdf':
       return <File className="h-10 w-10 text-red-500" />;
     case 'image':
-      return <Image className="h-10 w-10 text-purple-500" />;
+      return <ImageView className="h-10 w-10 text-purple-500" />;
     case 'video':
-      return <Video className="h-10 w-10 text-pink-500" />;
+      return <VideoView className="h-10 w-10 text-pink-500" />;
     default:
       return <File className="h-10 w-10" />;
   }
 }
 
-function Image(props: React.SVGProps<SVGSVGElement>) {
+function ImageView(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      role="presentation"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
       <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
       <circle cx="9" cy="9" r="2" />
       <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
@@ -287,9 +299,21 @@ function Image(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-function Video(props: React.SVGProps<SVGSVGElement>) {
+function VideoView(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      role="presentation"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
       <path d="m22 8-6 4 6 4V8Z" />
       <rect width="14" height="12" x="2" y="6" rx="2" ry="2" />
     </svg>

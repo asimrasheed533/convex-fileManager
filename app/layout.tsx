@@ -6,7 +6,6 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { ConvexClientProvider } from '@/providers/convex';
 import { ThemeProvider } from '@/providers/theme';
 import { Toaster } from '@/components/ui/sonner';
-import Header from '@/components/header';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -34,7 +33,6 @@ export default function RootLayout({
         <ConvexClientProvider>
           <NuqsAdapter>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-              <Header />
               {children}
               <Toaster />
             </ThemeProvider>

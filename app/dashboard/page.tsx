@@ -5,6 +5,7 @@ import { api } from '@/convex/_generated/api';
 import { redirect } from 'next/navigation';
 import { Id } from '@/convex/_generated/dataModel';
 import AuthProvider from '@/providers/auth';
+import Header from '@/components/header';
 
 export default async function Dashboard() {
   const cookie = await cookies();
@@ -23,6 +24,7 @@ export default async function Dashboard() {
 
   return (
     <AuthProvider user={user}>
+      <Header />
       <FileManager />
     </AuthProvider>
   );
