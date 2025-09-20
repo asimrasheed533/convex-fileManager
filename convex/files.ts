@@ -21,16 +21,19 @@ export const uploadfile = mutation({
 });
 
 export const getFiles = query({
-  args: { folder: v.union(v.id('folders'), v.null()) },
+  args: { folder: v.union(v.id('folders'), v.null()), userId: v.id('users') },
+
   handler: async (ctx, args) => {
     const folders = await ctx.db
       .query('folders')
       .withIndex('by_parent', (q) => q.eq('parent', args.folder))
+      .filter((q) => q.eq(q.field('user'), args.userId))
       .collect();
 
     const files = await ctx.db
       .query('files')
       .withIndex('by_folder', (q) => q.eq('folder', args.folder))
+      .filter((q) => q.eq(q.field('user'), args.userId))
       .collect();
 
     return [

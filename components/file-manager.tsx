@@ -20,10 +20,13 @@ import { toast } from 'sonner';
 import { useMutation, useQuery } from 'convex/react';
 import FilesWrapper from './file-warper';
 import { RenameFile } from './rename-file';
+import useAuth from '@/hooks/use-auth';
 
 export default function FileManager() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const user = useAuth();
 
   const error = searchParams.get('error');
 
@@ -44,7 +47,7 @@ export default function FileManager() {
 
   const folderId = selectedFolder === '' ? null : (selectedFolder as Id<'folders'>);
 
-  const { data: files, isPending } = useQueryWithStatus(api.files.getFiles, { folder: folderId }) ?? [];
+  const { data: files, isPending } = useQueryWithStatus(api.files.getFiles, { folder: folderId, userId: user._id }) ?? [];
 
   const filteredFiles = files?.filter((file) => file.name.toLowerCase().includes(query.toLowerCase()));
 

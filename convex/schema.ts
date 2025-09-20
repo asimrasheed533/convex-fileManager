@@ -9,6 +9,32 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index('by_email', ['email']),
+
+  invites: defineTable({
+    code: v.string(),
+    createdBy: v.id('users'),
+    invitedUser: v.optional(v.id('users')),
+    isUsed: v.boolean(),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+  }).index('by_code', ['code']),
+
+  chats: defineTable({
+    participants: v.array(v.id('users')),
+    createdAt: v.number(),
+  }),
+
+  messages: defineTable({
+    chatId: v.id('chats'),
+    sender: v.id('users'),
+    content: v.string(),
+    createdAt: v.number(),
+    deliveredTo: v.array(v.id('users')),
+    seenBy: v.array(v.id('users')),
+    status: v.optional(v.string()),
+    messageType: v.optional(v.string()),
+  }).index('by_chat', ['chatId']),
+
   folders: defineTable({
     name: v.string(),
     user: v.id('users'),
@@ -17,6 +43,7 @@ export default defineSchema({
   })
     .index('by_user', ['user'])
     .index('by_parent', ['parent']),
+
   files: defineTable({
     name: v.string(),
     user: v.id('users'),

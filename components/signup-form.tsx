@@ -26,6 +26,7 @@ export function SignUpForm({ className, ...props }: React.ComponentProps<'div'>)
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
+
     const confirmPassword = formData.get('confirmPassword') as string;
 
     startSubmit(async () => {
@@ -35,7 +36,14 @@ export function SignUpForm({ className, ...props }: React.ComponentProps<'div'>)
           return;
         }
 
-        await signUp({ name, email, password });
+        if (!name || !email || !password) {
+          throw new Error('Missing required fields');
+        }
+        await signUp({
+          name: name.toString(),
+          email: email.toString(),
+          password: password.toString(),
+        });
 
         router.push('/');
 
@@ -59,8 +67,9 @@ export function SignUpForm({ className, ...props }: React.ComponentProps<'div'>)
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="name">Full Name</Label>
-                <Input id="name" type="text" name="name" placeholder="John Doe" required />
+                <Input id="name" type="text" name="name" placeholder="Full Name" required />
               </div>
+
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" name="email" placeholder="m@example.com" required />

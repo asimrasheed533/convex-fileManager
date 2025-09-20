@@ -26,6 +26,12 @@ export const signup = mutation({
       throw new Error('User already exists with this email');
     }
 
+    const existingUsername = await ctx.db
+      .query('users')
+      .withIndex('by_email', (q) => q.eq('email', email))
+      .unique();
+    if (existingUsername) throw new Error('Email already taken');
+
     await ctx.db.insert('users', {
       name,
       email,
@@ -59,5 +65,16 @@ export const signIn = mutation({
     }
 
     return user._id;
+  },
+});
+
+export const getUserByEmail = query({
+  args: { email: v.string() },
+  handler: async (ctx, { email }) => {
+    const user = await ctx.db
+      .query('users')
+      .withIndex('by_email', (q) => q.eq('email', email))
+      .unique();
+    return user;
   },
 });
