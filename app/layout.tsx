@@ -33,26 +33,26 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookie = await cookies();
+  // const cookie = await cookies();
 
-  const token = cookie.get('token')?.value;
+  // const token = cookie.get('token')?.value;
 
-  if (!token) {
-    return redirect('/');
-  }
+  // if (!token) {
+  //   return redirect('/');
+  // }
 
-  const user = await fetchQuery(api.user.getCurrentUser, { userId: token as Id<'users'> });
+  // const user = await fetchQuery(api.user.getCurrentUser, { userId: token as Id<'users'> });
 
-  if (!user) {
-    return redirect('/');
-  }
+  // if (!user) {
+  //   return redirect('/');
+  // }
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ConvexClientProvider>
           <NuqsAdapter>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-              <AuthProvider user={user}>{children}</AuthProvider>
+              {children}
               <Toaster />
             </ThemeProvider>
           </NuqsAdapter>
