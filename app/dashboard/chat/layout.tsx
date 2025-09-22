@@ -1,13 +1,16 @@
-import FileManager from '@/components/file-manager';
-import { cookies } from 'next/headers';
-import { fetchQuery } from 'convex/nextjs';
 import { api } from '@/convex/_generated/api';
-import { redirect } from 'next/navigation';
 import { Id } from '@/convex/_generated/dataModel';
 import AuthProvider from '@/providers/auth';
-import Header from '@/components/header';
+import { fetchQuery } from 'convex/nextjs';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import React from 'react';
 
-export default async function Dashboard() {
+export default async function layout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   const cookie = await cookies();
 
   const token = cookie.get('token')?.value;
@@ -21,11 +24,9 @@ export default async function Dashboard() {
   if (!user) {
     return redirect('/');
   }
-
   return (
-    <AuthProvider user={user}>
-      <Header />
-      <FileManager />
-    </AuthProvider>
+    <div>
+      <AuthProvider user={user}>{children}</AuthProvider>
+    </div>
   );
 }

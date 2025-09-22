@@ -6,12 +6,6 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { ConvexClientProvider } from '@/providers/convex';
 import { ThemeProvider } from '@/providers/theme';
 import { Toaster } from '@/components/ui/sonner';
-import AuthProvider from '@/providers/auth';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { fetchQuery } from 'convex/nextjs';
-import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -33,19 +27,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // const cookie = await cookies();
-
-  // const token = cookie.get('token')?.value;
-
-  // if (!token) {
-  //   return redirect('/');
-  // }
-
-  // const user = await fetchQuery(api.user.getCurrentUser, { userId: token as Id<'users'> });
-
-  // if (!user) {
-  //   return redirect('/');
-  // }
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
@@ -53,6 +34,7 @@ export default async function RootLayout({
           <NuqsAdapter>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
               {children}
+
               <Toaster />
             </ThemeProvider>
           </NuqsAdapter>
