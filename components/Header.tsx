@@ -5,11 +5,9 @@ import { ModeToggle } from './theme-toggle';
 import { Button } from './ui/button';
 import { clearToken } from '@/actions/clearToken';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const user = useAuth();
-  const router = useRouter();
 
   const handleLogout = async () => {
     try {
@@ -28,15 +26,6 @@ export default function Header() {
           LogOut
         </Button>
         <ModeToggle />
-        <Button
-          variant="outline"
-          onClick={() => {
-            toast('Redirecting to chat...');
-            router.push('/dashboard/chat');
-          }}
-        >
-          Chat
-        </Button>
       </div>
     </header>
   );

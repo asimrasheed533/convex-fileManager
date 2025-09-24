@@ -26,7 +26,7 @@ export default defineSchema({
     storageId: v.id('_storage'),
     size: v.number(),
     mimeType: v.string(),
-    version: v.number(),
+    // version: v.number(),
     isPublic: v.boolean(),
     originalFile: v.optional(v.id('files')),
   })
