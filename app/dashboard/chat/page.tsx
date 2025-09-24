@@ -6,7 +6,9 @@ import { Contact } from '@/types';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import ChatBox from '@/components/chat/chat-box';
 import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import useAuth from '@/hooks/use-auth';
 
 interface Message {
   id: string;
@@ -69,11 +71,16 @@ const messagesByContact: Record<string, Message[]> = {
   ],
 };
 
-export default function ChatLayout() {
+export default async function ChatLayout() {
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [selectedContact, setSelectedContact] = useState<Contact>(contacts[0]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const currentMessages = messagesByContact[selectedContact.id] || [];
+  const user = useAuth();
+
+  const groups = useQuery(api.chat.getUserGroups, { userId: user._id });
+
+  console.log('groups,', groups);
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -91,17 +98,27 @@ export default function ChatLayout() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-chat-gradient-start to-chat-gradient-end">
-      <ChatSidebar
-        contacts={contacts}
+      {/* <ChatSidebar
+        groups={
+          groups?.map((g) => ({
+            id: g._id,
+            name: g.name,
+            status: g.status,
+          })) ?? []
+        }
         selectedContact={selectedContact}
         onContactSelect={(contact) => {
+          if (contact.status === 'pending') {
+            toast.info('This group is pending until members accept invite.');
+            return;
+          }
           setSelectedContact(contact);
           setSelectedChat(contact.id);
           setIsSidebarOpen(false);
         }}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
-      />
+      /> */}
       <div className="flex-1 flex flex-col">
         {selectedChat ? (
           <ChatBox selectedContact={selectedContact} messages={currentMessages} onOpenSidebar={() => setIsSidebarOpen(true)} />

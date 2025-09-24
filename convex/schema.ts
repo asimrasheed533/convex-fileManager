@@ -24,9 +24,21 @@ export default defineSchema({
 
   chats: defineTable({
     name: v.optional(v.string()),
-    participants: v.array(v.id('users')),
+    createdBy: v.id('users'),
+    participants: v.array(
+      v.object({
+        userId: v.id('users'),
+        status: v.union(v.literal('pending'), v.literal('accepted')),
+        invitedAt: v.optional(v.number()),
+        joinedAt: v.optional(v.number()),
+        role: v.optional(v.string()),
+      }),
+    ),
+    participantIds: v.array(v.id('users')),
     createdAt: v.number(),
-  }),
+  })
+    .index('by_participantIds', ['participantIds'])
+    .index('by_createdBy', ['createdBy']),
 
   messages: defineTable({
     chatId: v.id('chats'),

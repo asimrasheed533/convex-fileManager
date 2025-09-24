@@ -16,7 +16,6 @@ export default function NewGroupModal() {
   const [loading, setLoading] = useState(false);
   const createGroup = useMutation(api.chat.createGroup);
   const user = useAuth();
-  console.log('user', user);
 
   const handleCreate = async () => {
     if (!groupName.trim()) {
@@ -41,9 +40,8 @@ export default function NewGroupModal() {
       await navigator.clipboard.writeText(invite);
 
       toast.success('Group created! Invite link copied automatically.');
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to create group');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to create group');
     } finally {
       setLoading(false);
     }

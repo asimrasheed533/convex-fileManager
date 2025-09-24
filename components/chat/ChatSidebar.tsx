@@ -13,14 +13,14 @@ import { Badge } from '../ui/badge';
 import NewGroupModal from '../new-group-modal';
 
 interface ChatSidebarProps {
-  contacts: Contact[];
+  groups: Contact[];
   selectedContact: Contact;
   onContactSelect: (contact: Contact) => void;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function ChatSidebar({ contacts, selectedContact, onContactSelect, isOpen, onClose }: ChatSidebarProps) {
+export function ChatSidebar({ groups, selectedContact, onContactSelect, isOpen, onClose }: ChatSidebarProps) {
   const [query, setQuery] = useState('');
 
   return (
@@ -47,43 +47,43 @@ export function ChatSidebar({ contacts, selectedContact, onContactSelect, isOpen
       </div>
       <ScrollArea className={cn('flex-1 overflow-y-auto', 'max-h-[calc(100vh-8rem)]', 'md:max-h-none')}>
         <div className="p-2">
-          {contacts
-            .filter((contact) => contact.name.toLowerCase().includes(query.toLowerCase()))
-            .map((contact) => (
+          {groups
+            .filter((groups) => groups.name.toLowerCase().includes(query.toLowerCase()))
+            .map((groups) => (
               <Card
-                key={contact.id}
+                key={groups.id}
                 className={cn(
                   'p-3 mb-2 cursor-pointer transition-all duration-200 hover:bg-accent/50 border border-border/30',
                   'flex w-full sm:w-auto sm:max-w-md',
-                  selectedContact.id === contact.id && 'bg-accent border-primary/30',
+                  selectedContact.id === groups.id && 'bg-accent border-primary/30',
                 )}
-                onClick={() => onContactSelect(contact)}
+                onClick={() => onContactSelect(groups)}
               >
                 <div className="flex items-center gap-3 w-full">
                   <div className="relative flex-shrink-0">
                     <Avatar className="h-12 w-12 sm:h-14 sm:w-14">
-                      <AvatarImage src={contact.avatar || '/placeholder.svg'} alt={contact.name} />
+                      <AvatarImage src={groups.avatar || '/placeholder.svg'} alt={groups.name} />
                       <AvatarFallback className="bg-primary/10 text-primary">
-                        {contact.name
+                        {groups.name
                           .split(' ')
                           .map((n) => n[0])
                           .join('')}
                       </AvatarFallback>
                     </Avatar>
-                    {contact.online && <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-card" />}
+                    {groups.online && <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-card" />}
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <div className="font-medium text-foreground truncate">{contact.name}</div>
-                      <span className="text-xs text-muted-foreground flex-shrink-0">{contact.timestamp}</span>
+                      <div className="font-medium text-foreground truncate">{groups.name}</div>
+                      <span className="text-xs text-muted-foreground flex-shrink-0">{groups.timestamp}</span>
                     </div>
-                    <div className="text-sm text-muted-foreground mt-1">{contact.lastMessage?.split(' ').slice(0, 5).join(' ') + (contact.lastMessage?.split(' ').length > 6 ? '...' : '')}</div>
+                    <div className="text-sm text-muted-foreground mt-1">{groups.lastMessage?.split(' ').slice(0, 5).join(' ') + (groups.lastMessage?.split(' ').length > 6 ? '...' : '')}</div>
                   </div>
 
-                  {contact.unread && (
+                  {groups.unread && (
                     <Badge variant="default" className="bg-primary text-primary-foreground ml-2 flex-shrink-0">
-                      {contact.unread}
+                      {groups.unread}
                     </Badge>
                   )}
                 </div>
