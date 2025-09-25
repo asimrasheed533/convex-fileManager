@@ -81,12 +81,10 @@ export const editFile = mutation({
   },
   handler: async (ctx, args) => {
     const file = await ctx.db.get(args.fileId);
-    if (!file) {
-      throw new Error('File not found');
-    }
+    if (!file) throw new Error('File not found');
+
     await ctx.db.patch(args.fileId, { name: args.name });
-    const updatedFile = await ctx.db.get(args.fileId);
-    return updatedFile;
+    return await ctx.db.get(args.fileId);
   },
 });
 
