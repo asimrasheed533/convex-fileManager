@@ -1,15 +1,14 @@
+'use client';
+
+import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { fetchQuery } from 'convex/nextjs';
-import { redirect } from 'next/navigation';
 
-export default async function File({ params }: { params: Promise<{ fileId: string }> }) {
-  const { fileId } = await params;
+export default function File({ fileId }: { fileId: Id<'files'> }) {
+  const file = useQuery(api.files.getFile, { fileId });
 
-  if (!fileId) return redirect('/?error=invalid_file_id');
-
-  const file = await fetchQuery(api.files.getFile, { fileId: fileId as Id<'files'> });
-  if (!file) return redirect('/?error=file_not_found');
+  if (file === undefined) return <p>Loading...</p>;
+  if (file === null) return <p>File not found</p>;
 
   let src = file.fileUrl ?? '';
 
