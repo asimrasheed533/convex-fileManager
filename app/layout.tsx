@@ -34,7 +34,6 @@ export default async function RootLayout({
           <NuqsAdapter>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
               {children}
-
               <Toaster />
             </ThemeProvider>
           </NuqsAdapter>
